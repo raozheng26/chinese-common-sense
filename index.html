@@ -36,6 +36,7 @@
 【样式/主题】
   浅色 :root（Claude 暖纸 + 珊瑚强调）；深色 [data-theme="dark"]（清冷中性）。
   右上角 #themeBtn 切换(localStorage 记忆)，<head> 内脚本预置防闪烁。改色只动这两块变量。
+  右上角 #ghBtn 跳转 GitHub 仓库（#themeBtn 左侧，octocat 图标，样式同款）。
   右下角 #topBtn 返回顶部（scrollY>400 显示，smooth 滚动）。
 
 【移动端适配（≤860px，桌面端零改动）】
@@ -183,6 +184,9 @@
   /* 主题切换按钮 */
   #themeBtn{position:fixed;right:18px;top:14px;z-index:50;background:var(--panel);border:1px solid var(--line);color:var(--ink);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:15px;line-height:1;box-shadow:var(--shadow)}
   #themeBtn:hover{border-color:var(--accent)}
+  #ghBtn{position:fixed;right:62px;top:14px;z-index:50;display:flex;align-items:center;justify-content:center;background:var(--panel);border:1px solid var(--line);color:var(--ink);width:36px;height:36px;border-radius:10px;line-height:0;box-shadow:var(--shadow)}
+  #ghBtn:hover{border-color:var(--accent);color:var(--accent)}
+  #ghBtn svg{width:18px;height:18px;fill:currentColor}
   #topBtn{position:fixed;right:18px;bottom:18px;z-index:50;display:none;background:var(--panel);border:1px solid var(--line);color:var(--ink);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:17px;line-height:1;box-shadow:var(--shadow)}
   #topBtn:hover{border-color:var(--accent)}
   #topBtn.show{display:block}
@@ -220,6 +224,7 @@
 <script>(function(){var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;})();</script>
 </head>
 <body>
+<a id="ghBtn" href="https://github.com/raozheng26/chinese-common-sense" title="在 GitHub 上查看本仓库" aria-label="GitHub 仓库"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
 <button id="themeBtn" title="切换深色/浅色" aria-label="切换主题"></button>
 <button id="topBtn" title="返回顶部" aria-label="返回顶部">↑</button>
 <script>(function(){var b=document.getElementById('themeBtn'),r=document.documentElement;function s(){if(b)b.textContent=r.dataset.theme==='dark'?'☀️':'🌙';}s();if(b)b.onclick=function(){var n=r.dataset.theme==='dark'?'light':'dark';r.dataset.theme=n;localStorage.setItem('theme',n);s();};})();</script>
