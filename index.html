@@ -1,0 +1,5468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!--
+========================================================================
+个人常识补全地图 · 编辑规则（web 端不可见，供后续维护者阅读）
+========================================================================
+【目的】面向 INTJ + 中国教育背景 + 程序员的「功利性自我提升」清单——不是成为其它
+领域专家，而是用最小投入拿到最大生活收益。学习强度由 收益 × 性价比 决定。
+
+【四大类】
+  A 生活防身(钱/法/医/险/安全)   B 认知复利(思维模型，与编程相乘)
+  C 元能力/放大器(学习/决策/表达)  D INTJ补全(身体Se/情感Fi/社交/创作)
+
+【评分 1–5（针对本 profile 的主观判断，意在排序而非精确度量）】
+  收益 ret：到「够用」深度的人生价值(5=改写人生/高频高利害)
+  成本 cost：达到该深度的时间精力(5=需长年练习；越低越好，排序默认升序)
+  频率 freq：一辈子实际用到频率(5=几乎天天)
+  性价比 roi = 收益/成本（排序主依据）
+  推荐分 score = (收益 + 性价比 + 频率×0.5)/1.25，范围 0–10（勿超 10）
+  强度 tier：高(优先)/中(值得)/轻(浅尝按需，非跳过) —— 以收益为主、性价比为辅
+
+【展开详情 = 子领域 + 学习教程 + 中文资料】
+  DETAILS[name].sub  : 子领域，对象数组 {n:名称, u:B站教程链接, t:标题, p:播放, f:收藏}
+  DETAILS[name].tut  : 学习教程(通用/经典)，一般不动
+  CN_RESOURCES[name] : 实用中文资料，一般不动
+  CN_SUBFIELDS[name] : 已逐域清空（sub 已含全部子领域，detailHTML 不再合并）
+  ★ 子领域链接铁律：必须是该子领域的「教程/科普/讲解」，严禁 测评/评测/排行/选购/
+    广告/新闻/装修 等分叉内容；按 关键词匹配 + 播放&收藏高 筛选；播放过低(<5000)需重搜。
+    detailHTML 里 string→灰chip，object{n,u}→蓝超链接。
+
+【两条纪律（比清单本身更重要）】
+  1. 认死科普+ 天花板：尤其健康医学/法律/投资，「读三篇就敢上手」是 Dunning-Kruger 陷阱，
+     价值在 识伪 + 善用系统 + 知道何时交给专家。
+  2. 区分知识 vs 技能：A/B/C 多为知识型(科普+即终点)；D 为技能型(不练没收益，要么真练要么当观众)。
+
+【样式/主题】
+  浅色 :root（Claude 暖纸 + 珊瑚强调）；深色 [data-theme="dark"]（清冷中性）。
+  右上角 #themeBtn 切换(localStorage 记忆)，<head> 内脚本预置防闪烁。改色只动这两块变量。
+  右下角 #topBtn 返回顶部（scrollY>400 显示，smooth 滚动）。
+
+【移动端适配（≤860px，桌面端零改动）】
+  全部移动端规则封装在 <style> 末尾的 @media(max-width:860px){…} 内 + 一条 .twrap 规则；
+  桌面端(>860px) 表现与移动版上线前完全一致，改移动端只动这两块，勿碰基础样式。
+  ▸ 表格不卡片化：每个 <table> 外包 <div class="twrap">（overflow-x:auto），窄屏横向滚动，
+    9/10 列、表头排序、行展开 100% 保留；桌面端 table 不超宽，.twrap 无副作用。
+  ▸ .toolbar 移动端 position:static（取消吸顶，避免 wrap 后过高占满首屏）；改筛选用 #topBtn 回顶。
+  ▸ 容器 padding 收窄、.legend/.picks 改单列、.sec-head 换行、#search 自适应拉伸、表格 padding/字号紧凑。
+  ▸ viewport 已加 viewport-fit=cover 适配刘海屏。
+
+【筛选/排序/搜索】
+  类型&强度：多选(空=全部)；门槛：收益≥/成本≤/性价比≥；预设：一键组合；排序默认推荐分。
+  搜索：模糊匹配(LIKE) 领域名 + why + 资料 + 目标 + 子领域名。平铺=单表全局排序。
+
+【维护约定】
+  批量改子领域链接走 B站 MCP(bilibili-search-summary / bilibili-video-detail)，按领域并发≤10，
+  结果写 C:\\Users\\raozh\\mcp\\subs\\sub_<i>.json 或 fixes\\fix_<i>.json，
+  用 _merge_subs.js / _patch_subs.js 回写 DETAILS，每批即写防丢失。
+  改完必跑语法校验：抽取全部 script 块、用 new Function() 解析，确保 0 报错。
+========================================================================
+-->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>个人常识补全地图 · INTJ 程序员功利版</title>
+<style>
+  :root{
+    --bg:#f7f6f1; --panel:#ffffff; --panel2:#f1efe8; --ink:#2a2825; --dim:#7a776d; --line:#e7e3d9;
+    --hover:#f3f1ea; --detail:#fbf9f3; --star-empty:#d8d2c4;
+    --A:#c2603e; --B:#3a7a9e; --C:#7c5fb0; --D:#4d9077;
+    --high:#c2603e; --mid:#b08340; --low:#8d8a82;
+    --roi:#b08340; --accent:#c2603e; --on:#ffffff;
+    --shadow:0 1px 3px rgba(80,60,30,.06),0 1px 2px rgba(80,60,30,.04);
+  }
+  [data-theme="dark"]{
+    --bg:#1a1b1e; --panel:#232529; --panel2:#2c2f34; --ink:#ececed; --dim:#a7a9ae; --line:#36393f;
+    --hover:#2a2d32; --detail:#1f2024; --star-empty:#44474d;
+    --A:#e08a6a; --B:#6cb2e6; --C:#b89ae0; --D:#6fcfa6;
+    --high:#e08a6a; --mid:#e0b665; --low:#b6b2a6;
+    --roi:#e6c068; --accent:#e08a6a; --on:#1a1b1e;
+    --shadow:0 1px 3px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:ui-sans-serif,-apple-system,"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+    line-height:1.6;font-size:14px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1320px;margin:0 auto;padding:28px 24px 80px}
+  h1{font-size:25px;margin:0 0 4px;letter-spacing:.3px;font-weight:650}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .card h2{font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:8px;font-weight:650}
+  .tagline{background:var(--detail);border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin-bottom:16px;font-size:13px;color:var(--ink)}
+  .tagline b{color:var(--accent)}
+
+  /* 图例 */
+  .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+  .legend .it{font-size:12.5px;color:var(--dim)}
+  .legend .it b{color:var(--ink)}
+  .pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;margin-right:4px}
+  .p-high{background:rgba(194,96,62,.13);color:var(--high);border:1px solid rgba(194,96,62,.35)}
+  .p-mid{background:rgba(176,131,64,.14);color:var(--mid);border:1px solid rgba(176,131,64,.35)}
+  .p-low{background:rgba(141,138,130,.16);color:var(--low);border:1px solid rgba(141,138,130,.35)}
+
+  /* 速览 */
+  .picks{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:860px){.picks{grid-template-columns:1fr}}
+  .pick h3{font-size:13px;margin:0 0 8px;color:var(--dim)}
+  .pick ol{margin:0;padding-left:18px}
+  .pick li{margin:4px 0;font-size:12.5px}
+  .pick li .r{color:var(--roi);font-weight:700;font-variant-numeric:tabular-nums}
+  .pick li small{color:var(--dim)}
+
+  /* 工具栏 */
+  .toolbar{position:sticky;top:0;z-index:10;background:var(--bg);padding:10px 0;margin:0 0 14px;border-bottom:1px solid var(--line)}
+  .tb-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .grp{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .lab{color:var(--dim);font-size:12px;padding:0 2px 0 6px;white-space:nowrap}
+  .btn{background:var(--panel);border:1px solid var(--line);color:var(--dim);padding:5px 11px;border-radius:8px;cursor:pointer;font-size:12.5px;transition:.15s}
+  .btn:hover{color:var(--ink);border-color:var(--dim);background:var(--panel2)}
+  .btn.on{color:var(--on);font-weight:700;border-color:transparent}
+  .btn.ta.on{background:var(--A)} .btn.tb.on{background:var(--B)}
+  .btn.tc.on{background:var(--C)} .btn.td.on{background:var(--D)}
+  .btn.th.on{background:var(--high)} .btn.tm.on{background:var(--mid)} .btn.tl.on{background:var(--low)}
+  .btn.srt.on{background:var(--accent);color:var(--on);border-color:transparent;font-weight:700}
+  #search{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:6px 11px;border-radius:8px;font-size:12.5px;width:170px}
+  #search:focus{outline:none;border-color:var(--accent)}
+  .sel{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:5px 4px;border-radius:7px;font-size:12px;margin:0 2px;cursor:pointer}
+  .count{margin-left:auto;color:var(--dim);font-size:12px;white-space:nowrap}
+
+  /* 区块 */
+  section{margin-bottom:22px}
+  .sec-head{display:flex;align-items:center;gap:10px;margin:0 0 8px}
+  .dot{width:11px;height:11px;border-radius:3px}
+  .sec-title{font-size:16px;font-weight:650}
+  .sec-desc{color:var(--dim);font-size:12.5px}
+
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+  thead th{background:var(--panel2);color:var(--dim);font-size:12px;font-weight:600;text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap;user-select:none}
+  thead th.sortable{cursor:pointer}
+  thead th.sortable:hover{color:var(--ink)}
+  thead th .arr{color:var(--accent);font-size:10px;margin-left:2px}
+  tbody td{padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:top;font-size:12.8px}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--hover)}
+  .dname{font-weight:600;color:var(--ink)}
+  .dwhy{color:var(--dim);font-size:12.3px}
+  .dmat{color:var(--dim);font-size:11.8px}
+  .dmat b{color:var(--ink)}
+
+  /* 指标星（半星粒度，双层叠加） */
+  .mcell{display:inline-flex;flex-direction:column;align-items:center;gap:0;line-height:1.15}
+  .stars{position:relative;display:inline-block;font-family:Arial,"Segoe UI Symbol";font-size:13px;letter-spacing:1px;height:14px;white-space:nowrap}
+  .stars-empty{color:var(--star-empty)}
+  .stars-full{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap}
+  .mnum{font-variant-numeric:tabular-nums;font-size:10.5px;color:var(--dim)}
+  .mnum.roi{color:var(--roi);font-weight:700}
+  td.center,th.center{text-align:center}
+
+  /* 展开详情 */
+  tr.drow{cursor:pointer}
+  tr.drow.expanded{background:var(--hover)}
+  tr.detail td{background:var(--detail);padding:12px 16px;border-bottom:1px solid var(--line)}
+  .drow .dname::after{content:" ▸";color:var(--dim);font-weight:400}
+  .drow.expanded .dname::after{content:" ▾"}
+  .detail-wrap{display:grid;grid-template-columns:.95fr 1.15fr 1.15fr;gap:18px}
+  @media(max-width:860px){.detail-wrap{grid-template-columns:1fr}}
+  .dh{font-size:12px;color:var(--accent);font-weight:700;margin-bottom:6px}
+  .subs{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:3px 9px;border-radius:999px;font-size:11.5px}
+  a.chip{color:var(--B);text-decoration:none}
+  a.chip:hover{background:rgba(58,122,158,.12);border-color:var(--B)}
+  .tuts{margin:0;padding-left:18px}
+  .tuts li{margin:5px 0;font-size:12.3px;color:var(--ink)}
+  .tuts li small{color:var(--dim)}
+  .tuts li b{color:var(--ink)}
+  .tuts a,.tuts a.ref-link{color:var(--B);text-decoration:none;border-bottom:1px solid rgba(58,122,158,.4)}
+  .tuts a:hover,.tuts a.ref-link:hover{color:var(--accent);border-bottom-color:var(--accent)}
+  .ktag{display:inline-block;background:rgba(58,122,158,.13);color:var(--B);border:1px solid rgba(58,122,158,.3);padding:0 6px;border-radius:5px;font-size:10.5px;font-weight:600;margin:0 2px}
+  .empty2{color:var(--dim);font-style:italic;font-size:12px}
+  .empty{padding:30px;text-align:center;color:var(--dim)}
+  .foot{color:var(--dim);font-size:12px;margin-top:24px;line-height:1.7}
+  .foot b{color:var(--ink)}
+
+  /* 主题切换按钮 */
+  #themeBtn{position:fixed;right:18px;top:14px;z-index:50;background:var(--panel);border:1px solid var(--line);color:var(--ink);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:15px;line-height:1;box-shadow:var(--shadow)}
+  #themeBtn:hover{border-color:var(--accent)}
+  #topBtn{position:fixed;right:18px;bottom:18px;z-index:50;display:none;background:var(--panel);border:1px solid var(--line);color:var(--ink);width:36px;height:36px;border-radius:10px;cursor:pointer;font-size:17px;line-height:1;box-shadow:var(--shadow)}
+  #topBtn:hover{border-color:var(--accent)}
+  #topBtn.show{display:block}
+
+  /* 表格横向滚动壳：桌面端 table 不超宽，零副作用；窄屏作为可横向滚动容器 */
+  .twrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* ===== 移动端适配（≤860px）—— 全部封装在此，桌面端(>860px)零改动 ===== */
+  @media(max-width:860px){
+    .wrap{padding:14px 12px 56px}
+    h1{font-size:21px}
+    .sub{margin-bottom:12px;font-size:12.5px}
+    .tagline,.card{padding:11px 13px}
+    .card{margin-bottom:12px}
+    .legend{grid-template-columns:1fr}
+    /* 工具栏：取消常驻吸顶（wrap 后过高会占满首屏），紧凑化控件 */
+    .toolbar{position:static;padding:8px 0;margin-bottom:10px}
+    .tb-row{gap:6px}
+    .lab{padding-left:4px}
+    .btn{padding:5px 9px}
+    #search{flex:1 1 160px;min-width:120px;width:auto}
+    /* 区块标题：允许换行，描述独占一行 */
+    .sec-head{flex-wrap:wrap;gap:6px 8px}
+    .sec-title{font-size:15px}
+    .sec-desc{flex-basis:100%}
+    /* 表格：横向滚动 + 紧凑，保证 9/10 列、排序、展开全可用 */
+    .twrap table{min-width:640px}
+    thead th{padding:7px 6px;font-size:11.5px}
+    tbody td{padding:7px 6px;font-size:12.2px}
+    .dname{font-size:13px}
+    .dwhy{font-size:12px}
+    tr.detail td{padding:10px 12px}
+  }
+</style>
+<script>(function(){var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;})();</script>
+</head>
+<body>
+<button id="themeBtn" title="切换深色/浅色" aria-label="切换主题"></button>
+<button id="topBtn" title="返回顶部" aria-label="返回顶部">↑</button>
+<script>(function(){var b=document.getElementById('themeBtn'),r=document.documentElement;function s(){if(b)b.textContent=r.dataset.theme==='dark'?'☀️':'🌙';}s();if(b)b.onclick=function(){var n=r.dataset.theme==='dark'?'light':'dark';r.dataset.theme=n;localStorage.setItem('theme',n);s();};})();</script>
+<div class="wrap">
+
+  <h1>个人常识补全地图</h1>
+  <div class="sub" id="sub"></div>
+
+  <div class="tagline">
+    <b>目标不是成为其它领域的专家，而是用最小投入拿到最大生活收益。</b>
+    学习强度 = <b>收益 × 性价比</b>。<b>收益</b>：到「够用」深度时的人生价值；<b>成本</b>：达到该深度的时间精力；
+    <b>性价比 = 收益 ÷ 成本</b>；<b>推荐分</b> = 收益+性价比+频率×0.5（综合排序用）。所有分数针对<b>你这个 profile</b> 的主观判断（1–5），<b>⭐ 以星星可视化（半星粒度）</b>：收益/频率/性价比星越多越好，<b>成本</b>星越多=越费时。类型/强度可多选，门槛可过滤，预设一键直达。
+  </div>
+
+  <div class="card">
+    <h2>📋 怎么用 / 怎么读</h2>
+    <div class="legend">
+      <div class="it"><b>类型/强度</b>：点击可<b>多选</b>叠加（不选=全部）；点击已选再取消</div>
+      <div class="it"><b>门槛</b>：收益≥/成本≤/性价比≥ 三轴过滤，快速收敛到你想要的子集</div>
+      <div class="it"><b>预设</b>：一键应用常见组合（高性价比/低门槛/高收益/某类型）</div>
+      <div class="it"><b>排序</b>：默认按「推荐分」；可切性价比/收益/成本/频率/强度，点表头也行；成本越低越好</div>
+      <div class="it"><b>平铺</b>：切到单表全局排序，方便跨类型横向比较；<b>重置</b>清空所有筛选</div>
+      <div class="it"><b>资料·目标</b>：建议资料类型 + 科普+ 该停在哪（<b>轻</b>=浅尝/按需，非跳过）</div>
+    </div>
+  </div>
+
+
+  <!-- 速览（renderPicks 填充，独立于筛选，始终全量） -->
+  <div class="card">
+    <h2>⚡ 速览（全量，不受筛选影响）</h2>
+    <div class="picks">
+      <div class="pick"><h3>💎 高性价比 TOP（收益 ÷ 成本）</h3><ol id="top-roi"></ol></div>
+      <div class="pick"><h3>🎯 高收益 · 需投入（收益≥4 且 成本≥3）</h3><ol id="top-ret"></ol></div>
+    </div>
+  </div>
+
+  <!-- 工具栏 -->
+  <div class="toolbar">
+    <div class="tb-row">
+      <span class="lab" style="color:var(--accent);font-weight:700">🔍 筛选</span>
+      <span class="lab">类型</span>
+      <div class="grp" id="ftype" role="group" aria-label="类型筛选（可多选）">
+        <button class="btn ta" data-v="A">A 防身</button>
+        <button class="btn tb" data-v="B">B 认知</button>
+        <button class="btn tc" data-v="C">C 元能力</button>
+        <button class="btn td" data-v="D">D INTJ</button>
+      </div>
+      <span class="lab">强度</span>
+      <div class="grp" id="ftier" role="group" aria-label="强度筛选（可多选）">
+        <button class="btn th" data-v="高">高</button>
+        <button class="btn tm" data-v="中">中</button>
+        <button class="btn tl" data-v="轻">轻</button>
+      </div>
+      <span class="lab">收益≥</span><select id="fminRet" class="sel"><option value="">任意</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+      <span class="lab">成本≤</span><select id="fmaxCost" class="sel"><option value="">任意</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+      <span class="lab">性价比≥</span><select id="fminRoi" class="sel"><option value="">任意</option><option>1</option><option>1.5</option><option>2</option><option>2.5</option><option>3</option><option>4</option><option>5</option></select>
+      <input id="search" placeholder="搜领域 / 子领域 / 教程 / 关键词" aria-label="搜索领域、子领域、教程或关键词" />
+      <button class="btn" id="resetbtn">🔄 重置</button>
+    </div>
+    <div class="tb-row" style="margin-top:8px">
+      <span class="lab" style="color:var(--accent);font-weight:700">↕ 排序</span>
+      <div class="grp" id="fsort">
+        <button class="btn srt on" data-k="score">推荐分</button>
+        <button class="btn srt" data-k="roi">性价比</button>
+        <button class="btn srt" data-k="ret">收益</button>
+        <button class="btn srt" data-k="cost">成本</button>
+        <button class="btn srt" data-k="freq">频率</button>
+        <button class="btn srt" data-k="tier">强度</button>
+        <button class="btn" id="sortdir">降序 ↓</button>
+      </div>
+      <button class="btn" id="flatbtn">🔁 平铺</button>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="tb-row" style="margin-top:8px">
+      <span class="lab" style="color:var(--accent);font-weight:700">⚡ 快捷预设</span>
+      <div class="grp" id="fpreset">
+        <button class="btn" data-p="roi">💎 高性价比</button>
+        <button class="btn" data-p="cheap">⏱ 低门槛速成</button>
+        <button class="btn" data-p="ret">🎯 高收益</button>
+        <button class="btn" data-p="A">🛡 生活防身</button>
+        <button class="btn" data-p="C">🧰 元能力</button>
+        <button class="btn" data-p="D">🧠 INTJ短板</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="foot">
+    <b>两条纪律（比清单本身更重要）：</b><br>
+    1. <b>认死科普+ 的天花板</b>——尤其健康医学、法律、投资三块，「读了三篇就敢自己上手」是 Dunning-Kruger 经典陷阱，价值在「识伪、善用系统、知道何时交给专家」。<br>
+    2. <b>区分知识与技能</b>——A/B/C 多为知识型（科普+即终点）；D 为技能型（不练就没收益，要么真练要么坦然当观众）。<br>
+    分数为针对你 profile 的主观判断，意在帮你<b>排序</b>而非精确度量；按需调整。
+  </div>
+</div>
+
+<script>
+/* ========= 数据 ========= */
+/* type: A生活防身 B认知复利 C元能力 D INTJ补全 */
+const D = [
+  // ---- A 生活防身 ----
+  {name:"财商 / 个人金融",type:"A",ret:5,cost:2,freq:5,tier:"高",
+   why:"程序员现金流好却常是财商盲区；复利能改写人生轨迹，防骗(P2P/币圈/荐股群)是刚需。",
+   mat:"书为主 + 少量长期主义播客",ceil:"被动指数定投 + 资产配置 + 防骗；别碰主动选股/择时"},
+  {name:"健康医学素养",type:"A",ret:5,cost:3,freq:5,tier:"高",
+   why:"久坐高薪高压=最大单点风险；一辈子几千个健康决策 + 抵抗养生伪科学。",
+   mat:"书 + 纪录片 + 靠谱医生的长视频",ceil:"识伪科学 + 善用医疗系统 + 生活方式管理，不当自己的医生"},
+  {name:"睡眠科学（结构/节律/睡眠债）",type:"A",ret:5,cost:2,freq:5,tier:"高",
+   why:"睡眠是认知产出的底层硬件：深睡/REM 决定记忆巩固、睡眠债不可补、打鼾嗜睡(OSA)是被低估的隐患；和时间精力管理(排程)正交——这是硬件调优。",
+   mat:"睡眠医学科普书 + OSA 筛查量表 + 光照/温度方案",ceil:"量化睡眠债 + 识别 OSA 风险 + 建立节律方案"},
+  {name:"职业肌骨损伤防护（颈椎/腰椎）",type:"A",ret:5,cost:2,freq:5,tier:"高",
+   why:"久坐高智理工男第一杀手是「未老先残的身体」。区别于力量训练(增肌)，这是人因工程工位调校 + 3 分钟康复动作，一次性配置 + 每日微习惯。",
+   mat:"循证科普 + 工位配置清单 + 康复动作视频",ceil:"独立完成工位人因调校 + 5 套日常复位动作"},
+  {name:"求职劳动权益与劳动仲裁",type:"A",ret:5,cost:2,freq:3,tier:"高",
+   why:"程序员的 35 岁焦虑、裁员 N+1、竞业、加班费、试用期违法辞退是高频高利害；一次裁员谈判差额可达数万到数十万，学习成本极低、收益巨大，契合 INTJ 用规则对抗强者。",
+   mat:"《劳动合同法》+ 仲裁立案指南 + 案例短视频",ceil:"掌握 N/N+1/2N、竞业、试用期赔偿，能应对一次裁员谈判"},
+  {name:"安全与应急 / 急救",type:"A",ret:4,cost:1,freq:1,tier:"高",
+   why:"尾部风险防御，几小时结业一辈子受益（火场/CPR/海姆立克）。",
+   mat:"实操演示视频 + 一次线下培训",ceil:"拿到 CPR/急救认证"},
+  {name:"保险素养",type:"A",ret:4,cost:2,freq:2,tier:"高",
+   why:"用小钱对冲大病/意外的大额尾部风险，是理财的防守端。",
+   mat:"书 + 科普视频",ceil:"配齐医疗/定期寿险/意外险，看懂免责条款"},
+  {name:"房产常识",type:"A",ret:4,cost:2,freq:1,tier:"高",
+   why:"人生最大单笔消费，选筹/贷款/税费/陷阱都值得懂（按需深挖）。",
+   mat:"行业深度视频 + 从业者内容 + 政策",ceil:"决策前懂选筹 + 贷款方案 + 常见坑"},
+  {name:"数字安全与防诈骗",type:"A",ret:4,cost:1,freq:4,tier:"高",
+   why:"诈骗精准定向高薪人群；基础隐私卫生 + 识破话术。",
+   mat:"科普视频 + 清单",ceil:"防诈 + 基础隐私卫生"},
+  {name:"法律常识",type:"A",ret:4,cost:3,freq:3,tier:"中",
+   why:"被坑不知是常态；租房/劳动/婚姻/维权一辈子高频。",
+   mat:"案例驱动的律师科普短视频 + 工具书",ceil:"权利边界 + 证据意识 + 何时找律师"},
+  {name:"行政 / 社保公积金 / 个税",type:"A",ret:3,cost:1,freq:3,tier:"中",
+   why:"这些是你的法定权益，不懂等于白丢钱。",
+   mat:"官方指南 + 政务科普账号",ceil:"知道有什么权益 + 怎么领怎么用"},
+  {name:"驾驶与交通安全",type:"A",ret:3,cost:2,freq:4,tier:"轻",
+   why:"(若开车) 防御性驾驶=最实用的保命技能。",
+   mat:"防御驾驶视频",ceil:"风险预判与盲区意识"},
+
+  {name:"食品配料表与营养标签解读",type:"A",ret:5,cost:1,freq:5,tier:"高",
+   why:"买包装食品是每天最高频消费决策，但多数人看不懂配料表递减排序、「0 反式脂肪」陷阱(国标≤0.3g/100g 即可标0)、代可可脂/植脂末=反式脂肪；看懂这层能躲开超市 80% 隐形糖/钠/反式脂肪陷阱。",
+   mat:"国标解读 + 配料表口诀图 + 隐形糖/钠/反式脂肪别名清单",ceil:"进超市 30 秒判断一款包装食品值不值得买"},
+  {name:"口腔牙周健康与看牙求生",type:"A",ret:5,cost:2,freq:5,tier:"高",
+   why:"中国成人牙周健康率不足 10%，牙周炎是无声掉牙元凶且与心脑血管/糖尿病相关；懂预防(巴氏刷牙/牙线/洗牙周期)+懂就医(根管/种植/正畸如何不被过度治疗)能省数万保住原生牙。",
+   mat:"口腔医学会科普 + 牙医博主视频 + 丁香医生口腔专辑",ceil:"巴氏刷牙+牙线+洗牙周期+看牙不被过度治疗"},
+  {name:"体检报告解读与异常指标处理",type:"A",ret:5,cost:2,freq:5,tier:"高",
+   why:"九成人只会看箭头，不懂转氨酶/结节/息肉/血糖血脂/肿瘤标志物真实含义；区分复查/随访/立即就诊三档、看懂影像关键词——高频(年检)且高利害(漏早期信号)。",
+   mat:"三甲体检解读手册 + 辟谣系列 + 指标库",ceil:"读懂常规+肝肾血脂血糖+常见结节良恶性线索，知道何时两周内就诊"},
+  {name:"居家安全（燃气/用电/一氧化碳）",type:"A",ret:5,cost:1,freq:5,tier:"高",
+   why:"燃气泄漏≈数公斤 TNT、一氧化碳冬季高发且症状易误判为感冒、触电与电气火灾是居家伤亡主因；通风/漏电保护器测试/CO 报警器/肥皂水查漏/软管更换——学一遍用一辈子，不懂会死人。",
+   mat:"应急科普 + 漏电保护/查漏演示 + 报警器选购清单",ceil:"装报警器+会查漏+触电先断电+燃气泄漏关阀开窗撤离"},
+  {name:"消费维权实操（退款/投诉/举证）",type:"A",ret:5,cost:2,freq:5,tier:"高",
+   why:"七天无理由/假货虚假宣传/预付卡跑路/自动续费/医美教培退款 + 12315/黑猫/12305 渠道与举证；合法消费后的退款索赔，每年多次、单笔动辄几千上万，举证+话术决定能否拿回钱。",
+   mat:"消法/电商法核心条款 + 12315/黑猫流程 + 投诉话术模板 + 举证清单",ceil:"被坑 48 小时内启动、举证完整、话术到位的维权 SOP"},
+  {name:"信用与贷款常识",type:"A",ret:5,cost:2,freq:4,tier:"高",
+   why:"征信/逾期/信用卡消费贷/房贷车贷利率/提前还款违约金/以贷养贷/担保连带——对接银行体系、影响一生融资成本，买房买车必过此关；还有「征信洗白」中介骗局。",
+   mat:"央行征信中心政策原文 + 个贷指南 + 防骗案例",ceil:"看懂征信报告+对比贷款利率+维持信用良好+避洗白骗局"},
+  {name:"医保报销规则与就医省钱",type:"A",ret:5,cost:2,freq:4,tier:"高",
+   why:"起付线/封顶线/报销比例、社区(高)vs 三甲(低)、门诊统筹 vs 住院、异地备案、家庭共济、大病二次报销——一次三甲住院因不懂可能多花数千上万。",
+   mat:"医保局政策问答 + 报销比例对照表 + 异地备案教程",ceil:"会选就医层级省钱+用共济账户+办异地备案+申请大病二次报销"},
+  {name:"遗嘱与财产传承",type:"A",ret:5,cost:3,freq:2,tier:"高",
+   why:"民法典后 60%+ 自书遗嘱因形式瑕疵无效，独生子女也可能无法独得父母房产；涉及婚前财产/按份共有/保单受益人——中国家庭最高频却最少主动学的「不学必踩坑」。",
+   mat:"民法典继承编 + 中华遗嘱库/公证处流程 + 自书遗嘱模板",ceil:"为父母和自己各起草一份形式完备、能经司法认定的遗嘱"},
+  {name:"科学减脂与体重管理认知",type:"A",ret:5,cost:2,freq:5,tier:"高",
+   why:"中国成人超重肥胖率过半，大众深陷局部减脂/代餐/盲目生酮/「运动抵消奶茶」(400 大卡需跑 40 分钟)等伪科学；掌握能量平衡+饮食占 70%+可持续习惯是高频终身技能。",
+   mat:"肥胖医学营养治疗指南 + 科学辟谣减脂系列 + BMI/腰围自测",ceil:"会算 BMI/腰围警戒值+看懂热量+识骗局+定可持续方案"},
+
+  // ---- B 认知复利 ----
+  {name:"经济学与激励理论",type:"B",ret:5,cost:3,freq:5,tier:"高",
+   why:"「人如何选择」是理解一切人类系统的底座，Munger 心智模型网的核心。",
+   mat:"经典教材 + 科普书 + 系统公开课",ceil:"微观直觉 + 行为偏误清单"},
+  {name:"概率与风险 / 期望值思维",type:"B",ret:5,cost:2,freq:5,tier:"高",
+   why:"跨学科元能力，直接和编程相乘(ML/A-B)，日常决策无处不在。",
+   mat:"经典科普书",ceil:"贝叶斯直觉 + 用期望值做决策"},
+  {name:"社会心理学与影响力",type:"B",ret:5,cost:2,freq:5,tier:"高",
+   why:"看懂群体行为 + 识别被操纵(Cialdini)，天天用。",
+   mat:"经典科普书 + 实验纪录片",ceil:"识别影响力武器 + 群体偏误"},
+  {name:"科学方法论与可证伪思维",type:"B",ret:5,cost:2,freq:5,tier:"高",
+   why:"INTJ 最危险的是「聪明人的自洽幻觉」——能给自己编出完美逻辑的错觉。可证伪性/奥卡姆剃刀/确认偏差对抗=程序员 assert 在现实信念上的应用，直接降级自己的错误信念。",
+   mat:"经典科普书 + 批判性检查清单",ceil:"对每个坚信的判断能问「什么证据能推翻它」"},
+  {name:"逻辑学与谬误识别",type:"B",ret:5,cost:2,freq:5,tier:"高",
+   why:"系统学谬误库(肯定后件/稻草人/诉诸动机/合成谬误)后，看技术争论/PRD/职场甩锅能立刻识别话术漏洞；中国语境下情绪化讨论替代论证是普遍现象，带逻辑武器=降维打击。",
+   mat:"经典教材 + 谬误速查卡",ceil:"背熟常见谬误 + 能拆解长篇论证"},
+  {name:"系统思维与复杂性",type:"B",ret:4,cost:2,freq:4,tier:"高",
+   why:"反馈回路/涌现/瓶颈/二阶效应，看问题比常人深一层，和系统设计相通。",
+   mat:"经典书 + 图解/可视化内容",ceil:"Thinking in Systems 级直觉"},
+  {name:"博弈论",type:"B",ret:4,cost:3,freq:3,tier:"中",
+   why:"你已尝过甜头——战略互动的通用语言(谈判/竞争/合作)。",
+   mat:"大学公开课 + 科普书",ceil:"识别纳什均衡/囚徒/重复博弈在生活中的映射"},
+  {name:"各行业运行逻辑",type:"B",ret:4,cost:3,freq:3,tier:"中",
+   why:"看懂医疗/金融/地产/媒体/教育怎么运转=看懂世界；懂行业的程序员极稀缺、溢价高。",
+   mat:"行业纪录片 + 产业播客 + 轻读财报/招股书",ceil:"每个行业讲清「怎么赚钱/谁博弈」"},
+  {name:"历史与政治经济",type:"B",ret:3,cost:4,freq:2,tier:"轻",
+   why:"理解「当下为何如此」；补中国单一叙事的多元视角。",
+   mat:"严肃历史书 + 纪录片 + 长播客",ceil:"多元视角 + 时间感，别沦为时政键盘侠"},
+
+  {name:"消费决策与反消费主义",type:"B",ret:5,cost:2,freq:5,tier:"高",
+   why:"买东西防坑：识别多功能家电吃灰/颜值溢价/伪需求种草/大促凑单/分期杠杆，掌握需求清单→使用频次→平替比对→冷静期决策流程；天天发生，省下的是终身复利。",
+   mat:"决策清单 + 智商税品类黑榜 + 平替数据库",ceil:"大额/冲动消费前自动跑流程，建立反种草习惯"},
+  {name:"副业与第二收入",type:"B",ret:4,cost:2,freq:5,tier:"中",
+   why:"经济不确定性下最现实的增收：方向选择(自媒体/电商/技能变现/知识付费/接单)、变现周期、避割韭菜副业课、副业报税、与主业竞业冲突——人人可起步的抗风险杠杆。",
+   mat:"副业方向测评 + 真实变现周期数据 + 避坑指南 + 报税指引",ceil:"选定 1 个匹配技能的副业并跑通第一笔收入"},
+
+  // ---- C 元能力 / 放大器 ----
+  {name:"学习科学 / 如何学习",type:"C",ret:5,cost:1,freq:5,tier:"高",
+   why:"你要学几十个领域——先学会「如何学」是最高杠杆。",
+   mat:"科普书 + 方法清单",ceil:"建立个人学习系统(间隔重复/刻意练习/费曼)"},
+  {name:"提问 · 检索 · AI 使用素养",type:"C",ret:4,cost:1,freq:5,tier:"高",
+   why:"AI 时代=会问会搜的人效率 10 倍，天天用，且和编程相乘。",
+   mat:"实操 + 指南",ceil:"建立提问/检索/AI 协作的工作流"},
+  {name:"AI Agent 编排与自治工作流",type:"C",ret:5,cost:3,freq:5,tier:"高",
+   why:"已有「提问检索 AI」只到单轮调用；2026 真正的杠杆是编排多 Agent+工具+记忆完成端到端任务。你的编程底子让成本极低、收益是数量级放大——一个人变一支虚拟团队。",
+   mat:"官方 Agent 构建指南 + 开源框架实战 + 全栈教程",ceil:"独立设计部署 1-2 个能调用工具、跨步骤自治完成真实任务的 Agent"},
+  {name:"信息与统计素养",type:"C",ret:5,cost:2,freq:5,tier:"高",
+   why:"元能力：决定你对一切信息(含本表所有领域)的判断质量。",
+   mat:"经典科普书 + 主题纪录片",ceil:"评估信息源 + 避统计陷阱(相关≠因果/选择性偏差)"},
+  {name:"信息饮食与高信噪比信息源治理",type:"C",ret:4,cost:2,freq:5,tier:"高",
+   why:"算法投喂已严重扭曲注意力。和「信息统计素养」(辨真伪)、「提问检索 AI」(怎么找)正交——这是渠道治理与注意力护城河：建立一手信息源、定期断食、按营养配比。",
+   mat:"数字极简主义书 + RSS/订阅工具 + 信息源审计模板",ceil:"建立 5-10 个高信噪比一手源 + 每周摄入清单"},
+  {name:"写作与结构化表达",type:"C",ret:5,cost:2,freq:5,tier:"高",
+   why:"把复杂事讲清=程序员最大的影响力放大器。",
+   mat:"经典写作书 + 刻意练习",ceil:"能向外行讲清技术 / 写清方案"},
+  {name:"决策科学",type:"C",ret:5,cost:2,freq:5,tier:"高",
+   why:"一辈子几千个决策，建立流程比逐个拍脑袋强。",
+   mat:"经典书 + 决策清单",ceil:"建立个人决策流程(预验尸/相反选项/期望值)"},
+  {name:"时间与精力管理",type:"C",ret:4,cost:2,freq:5,tier:"高",
+   why:"业余学习靠的是稳定节奏，不是意志力。",
+   mat:"书 + 工具实践",ceil:"找到可持续的节奏 + 精力管理"},
+  {name:"项目管理（生活与工作）",type:"C",ret:4,cost:2,freq:4,tier:"高",
+   why:"把买房/学习/健康当项目管，成功率翻倍。",
+   mat:"书 + 模板实践",ceil:"能拆解/排期/跟踪生活大事"},
+
+  // ---- D INTJ 补全 / 技能身体 ----
+  {name:"情绪与认知科学（Fi）",type:"D",ret:5,cost:3,freq:5,tier:"高",
+   why:"INTJ 自认理性但情绪暗中驱动决策；自我觉察=元领导力。",
+   mat:"书 + journaling 写作 + 可能的心理咨询",ceil:"自我觉察 + 情绪调节，成长靠内省非堆知识"},
+  {name:"社交与沟通",type:"D",ret:5,cost:3,freq:5,tier:"高",
+   why:"INTJ 最大天花板；会沟通的 INTJ 战斗力翻倍。已有 Te 表达底子，补倾听/共情/影响力。",
+   mat:"书 + 实战(Toastmasters/即兴剧) + 刻意社交",ceil:"从「回避」到「够用且舒适」"},
+  {name:"中国特色人际关系（职场/人情/面子）",type:"D",ret:5,cost:3,freq:5,tier:"高",
+   why:"中国是高语境人情社会：面子/guanxi/站队/向上管理/人情债是硬规则。INTJ 直来直去、重理轻情最易吃暗亏——补的是「读懂潜规则」的能力，不是学油滑。",
+   mat:"本土职场/关系学书 + 播客 + 观察实践",ceil:"读懂场合/给得了面子/维护关键关系/向上管理；不做刺头也不当马屁精"},
+  {name:"两性关系与婚恋博弈（当下语境）",type:"D",ret:5,cost:3,freq:3,tier:"高",
+   why:"当下两性高度紧张、信息场极端化。理性男性的高收益做法：用博弈+激励思维理解系统，懂婚姻法/财产(自我保护)、筛价值观(找对人比赢重要)、设边界，并主动「去毒化」信息饮食——目标是身处健康关系，而非赢得性别战争。",
+   mat:"婚姻法/财产科普 + 关系心理学书 + 远离对立向算法内容",ceil:"懂法律财产保护 + 能筛选伴侣 + 维护边界 + 不被极端舆论裹挟"},
+  {name:"成人依恋类型与关系重构",type:"D",ret:5,cost:2,freq:4,tier:"高",
+   why:"INTJ 群体高度集中于疏离/恐惧型回避依恋，是「渴望深度却无法投入」的核心卡点。比泛泛社交技巧更底层——识别自己的激活/去激活策略，理解依恋可经安全关系与自我觉察重塑。",
+   mat:"依恋心理学书 + 成人依恋量表 + 学术综述",ceil:"完成依恋自评 + 识别策略 + 在关系中实践安全行为"},
+  {name:"力量训练 / 一项纯身体技能",type:"D",ret:4,cost:4,freq:5,tier:"中",
+   why:"Se 是你最大短板；过度活在脑子=焦虑失眠根源，纯身体活动是解毒剂。",
+   mat:"线下教练/社群 + 短技巧视频（80%靠练）",ceil:"终身习惯，不必求某级"},
+  {name:"谈判与说服",type:"D",ret:4,cost:3,freq:4,tier:"中",
+   why:"薪资/交易/合作中争取应得利益，高频高利害。",
+   mat:"书 + 模拟实战",ceil:"能在高风险交易中系统争取"},
+  {name:"亲密关系认知",type:"D",ret:4,cost:3,freq:4,tier:"中",
+   why:"高人生杠杆，INTJ 易忽视的情感系统。",
+   mat:"书 + 反思",ceil:"建立健康关系模式(依恋/沟通)"},
+  {name:"审美创作输出",type:"D",ret:4,cost:5,freq:3,tier:"中",
+   why:"把已有的音乐/摄影/哲思输入转成输出=人格局跃迁；INTJ 常想得多做得少。",
+   mat:"项目制 + 导师/社群反馈 + 完成度压力",ceil:"完成一个作品项目（突破科普+，认真练）"},
+  {name:"烹饪",type:"D",ret:3,cost:2,freq:5,tier:"轻",
+   why:"实用 + Se + 健康可控，低门槛高频率。",
+   mat:"视频 + 实操",ceil:"稳定做出健康一餐"},
+  {name:"冥想 / 正念",type:"D",ret:3,cost:2,freq:5,tier:"轻",
+   why:"训练「回到当下」，对过度思考的 INTJ 是直接解药。",
+   mat:"引导音频 + app + 书",ceil:"稳定每日 10 分钟练习"},
+  {name:"基础工程 / 家居与万物运转",type:"D",ret:3,cost:2,freq:2,tier:"轻",
+   why:"实用(小修小补) + Se + 理解物质世界。",
+   mat:"视频 + 动手",ceil:"处理常见家用故障 + 安全用电"},
+  {name:"亲子沟通与情绪教养（非暴力养育）",type:"D",ret:5,cost:3,freq:5,tier:"高",
+   why:"(若有娃/未来)吼叫打骂冷暴力仍普遍，是青少年抑郁重要诱因；「看见情绪-共情-立规则」的非暴力沟通+不用威胁羞辱的设限，直接降低孩子心理问题、修复信任。",
+   mat:"非暴力沟通养育书 + 音频课 + 情景话术卡",ceil:"一周戒吼叫+10 分钟化解孩子一次情绪崩溃"}
+];
+
+/* 类型元信息 */
+const TYPE = {
+  A:{c:"var(--A)",n:"A · 生活防身",d:"中国教育不教的硬常识（钱/法/医/险/安全）。确定性 ROI 最高，先兜底。"},
+  B:{c:"var(--B)",n:"B · 认知复利",d:"可跨领域迁移的心智模型，和你编程能力相乘。长线 ROI 最高。"},
+  C:{c:"var(--C)",n:"C · 元能力 / 放大器",d:"学会如何学/如何决策/如何表达——放大其它一切学习的杠杆。"},
+  D:{c:"var(--D)",n:"D · INTJ 补全 / 技能身体",d:"你人格最弱项(Se/Fi)=最大隐藏天花板；靠练习不靠输入。"}
+};
+const TIER_CL={高:"p-high",中:"p-mid",轻:"p-low"};
+const DETAILS={
+  "财商 / 个人金融": {
+    "sub": [
+      {
+        "n": "预算与现金流",
+        "u": "https://www.bilibili.com/video/BV1DCpEzLEBJ",
+        "t": "一口气了解现金流的前世今生！—能活下去，才有资格谈盈利！【现金流解码】",
+        "p": 344025,
+        "f": 20949
+      },
+      {
+        "n": "储蓄与应急金",
+        "u": "https://www.bilibili.com/video/BV1dU4y1Z7fP",
+        "t": "【懒人存钱法】超简单3个定期存钱小技巧",
+        "p": 67136,
+        "f": 1317
+      },
+      {
+        "n": "复利与负债",
+        "u": "https://www.bilibili.com/video/BV1zJ411a7Hv",
+        "t": "复利（利滚利）有多大威力？5分钟带你认识复利【普通人理财学院】",
+        "p": 123596,
+        "f": 2377
+      },
+      {
+        "n": "投资基础",
+        "u": "https://www.bilibili.com/video/BV1EuxTe3EB6",
+        "t": "【股票入门课程】新手小白炒股入门基础知识讲解",
+        "p": 7795110,
+        "f": 231792
+      },
+      {
+        "n": "退休规划",
+        "u": "https://www.bilibili.com/video/BV1P3SkBSEVJ",
+        "t": "退休之后，到底能领多少养老金？",
+        "p": 953163,
+        "f": 10845
+      },
+      {
+        "n": "个税专项扣除",
+        "u": "https://www.bilibili.com/video/BV1Wv4y1976V",
+        "t": "说人话！10分钟学会个人所得税怎么算，专项附加扣除是什么？打工人工资里的个税小知识都在这里！",
+        "p": 253191,
+        "f": 7237
+      },
+      {
+        "n": "金融风险识别",
+        "u": "https://www.bilibili.com/video/BV1KK4y1a72P",
+        "t": "警惕！我被假网贷平台诈骗了，揭秘背后的真实运作",
+        "p": 315933,
+        "f": 3294
+      }
+    ],
+    "tut": [
+      {
+        "title": "Personal Finance",
+        "platform": "Khan Academy",
+        "kind": "公开课",
+        "why": "从预算、利息、债务、投资和退休规划讲起，零基础友好"
+      },
+      {
+        "title": "Financial Markets",
+        "platform": "Yale Online / Coursera",
+        "kind": "公开课",
+        "why": "Robert Shiller 主讲，帮助理解证券、银行、保险和风险管理"
+      },
+      {
+        "title": "《小狗钱钱》",
+        "platform": "书",
+        "kind": "书",
+        "why": "用寓言讲清储蓄、目标和资产意识，适合作为财商启蒙"
+      }
+    ]
+  },
+  "健康医学素养": {
+    "sub": [
+      {
+        "n": "健康信息辨别",
+        "u": "https://www.bilibili.com/video/BV11L411A7zW",
+        "t": "转给长辈最靠谱的100条健康辟谣帖！别再搞错了！",
+        "p": 829571,
+        "f": 1391
+      },
+      {
+        "n": "疫苗接种",
+        "u": "https://www.bilibili.com/video/BV1ZK411M7ZB",
+        "t": "【医学博士】注射疫苗我们在怕什么？｜疫苗的副作用？",
+        "p": 1526168,
+        "f": 12027
+      },
+      {
+        "n": "就医沟通",
+        "u": "https://www.bilibili.com/video/BV1Qqp6eJEUi",
+        "t": "保姆级医院看病流程，附就医流程图",
+        "p": 213224,
+        "f": 16883
+      },
+      {
+        "n": "常见病基础",
+        "u": "https://www.bilibili.com/video/BV1pz4y1X7Pp",
+        "t": "【Osmosis合集】心血管系统疾病（更至21P｜中英）",
+        "p": 229258,
+        "f": 18365
+      },
+      {
+        "n": "药物与副作用",
+        "u": "https://www.bilibili.com/video/BV1pa4y1v7ot",
+        "t": "抗抑郁药物大揭秘（第二期）：常见副作用有哪些？吃多了会不会上瘾？",
+        "p": 47054,
+        "f": 486
+      },
+      {
+        "n": "医保目录",
+        "u": "https://www.bilibili.com/video/BV1eg4y1i7wX",
+        "t": "【中国医保】轻松了解医保政策！",
+        "p": 252183,
+        "f": 8682
+      },
+      {
+        "n": "慢病随访",
+        "u": "https://www.bilibili.com/video/BV1ez4y1R7d2",
+        "t": "【医药卫生】常见慢性病管理",
+        "p": 13664,
+        "f": 1005
+      }
+    ],
+    "tut": [
+      {
+        "title": "Understanding Medical Research: Your Facebook Friend is Wrong",
+        "platform": "Yale Online / Coursera",
+        "kind": "公开课",
+        "why": "专门训练普通人识别研究设计、偏倚和统计误读"
+      },
+      {
+        "title": "Crash Course Anatomy & Physiology",
+        "platform": "YouTube",
+        "kind": "视频",
+        "why": "用短视频建立人体系统和医学术语的基础框架"
+      },
+      {
+        "title": "MedlinePlus 健康主题",
+        "platform": "U.S. National Library of Medicine",
+        "kind": "文章",
+        "why": "面向公众解释疾病、检查、药物和就医常识"
+      }
+    ]
+  },
+  "睡眠科学（结构/节律/睡眠债）": {
+    "sub": [
+      {
+        "n": "睡眠卫生",
+        "u": "https://www.bilibili.com/video/BV1dq4y1U7KT",
+        "t": "9:42",
+        "p": 784728,
+        "f": 582
+      },
+      {
+        "n": "午睡策略",
+        "u": "https://www.bilibili.com/video/BV1Cd4y1q7oD",
+        "t": "5:01",
+        "p": 214212,
+        "f": 301
+      },
+      {
+        "n": "睡眠结构",
+        "u": "https://www.bilibili.com/video/BV1xg411P7y6",
+        "t": "10:57",
+        "p": 54035,
+        "f": 657
+      },
+      {
+        "n": "昼夜节律",
+        "u": "https://www.bilibili.com/video/BV1DL411D7nc",
+        "t": "规律作息的神秘力量：太阳光（内含行为策略）",
+        "p": 74564,
+        "f": 4446
+      },
+      {
+        "n": "睡眠债",
+        "u": "https://www.bilibili.com/video/BV1Ev411p7Zj",
+        "t": "7:20",
+        "p": 23073,
+        "f": 440
+      },
+      {
+        "n": "失眠与睡眠障碍",
+        "u": "https://www.bilibili.com/video/BV1PE421P7Kh",
+        "t": "11:24",
+        "p": 844474,
+        "f": 684
+      }
+    ],
+    "tut": [
+      {
+        "title": "Sleep: Neurobiology, Medicine, and Society",
+        "platform": "University of Michigan / Coursera",
+        "kind": "公开课",
+        "why": "从神经生物学、医学和社会影响系统讲解睡眠"
+      },
+      {
+        "title": "The Truth About: Sleep",
+        "platform": "BBC",
+        "kind": "纪录片",
+        "why": "用大众化实验展示睡眠习惯、睡眠问题和改善方向"
+      },
+      {
+        "title": "CDC Sleep and Sleep Disorders",
+        "platform": "CDC",
+        "kind": "文章",
+        "why": "适合查睡眠时长、睡眠健康和常见风险"
+      }
+    ]
+  },
+  "职业肌骨损伤防护（颈椎/腰椎）": {
+    "sub": [
+      {
+        "n": "久坐微休息",
+        "u": "https://www.bilibili.com/video/BV1zTLbzNE9N",
+        "t": "13min快速充电！这套上班带薪拉伸能续命！【哔需练练】",
+        "p": 234055,
+        "f": 23931
+      },
+      {
+        "n": "办公室人体工学",
+        "u": "https://www.bilibili.com/video/BV1Djq8YPEyr",
+        "t": "物理治疗师：烂板凳比任何人体工学椅都强｜【初日会客室】三个字物理治疗所院长 三个字",
+        "p": 749748,
+        "f": 23933
+      },
+      {
+        "n": "颈椎保护",
+        "u": "https://www.bilibili.com/video/BV1Zp4y1o7iv",
+        "t": "低头族怎么拯救颈椎？骨科医生：按摩谨慎！膏药可用！按摩仪嘛……【颈椎病/脖子前倾/关节弹响/富贵包】",
+        "p": 1316472,
+        "f": 24498
+      },
+      {
+        "n": "腰椎间盘突出防护",
+        "u": "https://www.bilibili.com/video/BV1zE421M72Q",
+        "t": "【奥运冠军的脊医博士后】腰突出了不要怕 硬核3招有效",
+        "p": 1849932,
+        "f": 87300
+      },
+      {
+        "n": "鼠标手（腕管综合征）",
+        "u": "https://www.bilibili.com/video/BV1Lu411q7CM",
+        "t": "每天按一遍 有效缓解+预防 手机手、鼠标手、游戏手.... (含自检)",
+        "p": 3978773,
+        "f": 168469
+      },
+      {
+        "n": "重复性劳损与疼痛康复",
+        "u": "https://www.bilibili.com/video/BV1oz4y1k7WC",
+        "t": "【24种疼痛康复训练营】",
+        "p": 66961,
+        "f": 7946
+      }
+    ],
+    "tut": [
+      {
+        "title": "Mayo Clinic Minute: Ergonomic recommendations for working from home",
+        "platform": "Mayo Clinic / YouTube",
+        "kind": "视频",
+        "why": "用短视频演示居家办公工位调整，容易照着做"
+      },
+      {
+        "title": "Computer Workstations eTool",
+        "platform": "OSHA",
+        "kind": "文章",
+        "why": "图示显示器、椅子、键鼠、手腕和腰背支撑要点"
+      },
+      {
+        "title": "Elements of Ergonomics Programs",
+        "platform": "NIOSH / CDC",
+        "kind": "文章",
+        "why": "解释职业性肌肉骨骼损伤的风险识别和控制"
+      }
+    ]
+  },
+  "求职劳动权益与劳动仲裁": {
+    "sub": [
+      {
+        "n": "劳动合同",
+        "u": "https://www.bilibili.com/video/BV1No4y1Y7SM",
+        "t": "HR劳动关系管理必备：三小时拿捏劳动合同法，掌握劳动合同法走遍职场不用怕",
+        "p": 432311,
+        "f": 38853
+      },
+      {
+        "n": "工资工时与加班",
+        "u": "https://www.bilibili.com/video/BV18s4y1P7hj",
+        "t": "一个视频让你搞懂三种工时制【开工时刻】",
+        "p": 10238,
+        "f": 186
+      },
+      {
+        "n": "社保与工伤",
+        "u": "https://www.bilibili.com/video/BV1tBamzyEBA",
+        "t": "一次搞定所有打工人社保困惑！【深蓝保】",
+        "p": 21113,
+        "f": 1396
+      },
+      {
+        "n": "竞业限制",
+        "u": "https://www.bilibili.com/video/BV18G4y1u7s7",
+        "t": "别被竞业吓到了，职场必备知识，都来学",
+        "p": 93700,
+        "f": 2520
+      },
+      {
+        "n": "试用期辞退与N/N+1补偿",
+        "u": "https://www.bilibili.com/video/BV1WN5BzeEwD",
+        "t": "【被辞退攻略】亲身经历！从N+1到社保不断+失业金领取！纯干货建议收藏",
+        "p": 73303,
+        "f": 1
+      },
+      {
+        "n": "证据留存",
+        "u": "https://www.bilibili.com/video/BV1MS6hYGEzM",
+        "t": "【内部教学】一个视频教会你怎么写劳动仲裁证据清单",
+        "p": 17631,
+        "f": 1110
+      },
+      {
+        "n": "劳动仲裁流程",
+        "u": "https://www.bilibili.com/video/BV1KT411778J",
+        "t": "教你打官司！劳动仲裁全流程讲解",
+        "p": 541422,
+        "f": 34780
+      }
+    ],
+    "tut": [
+      {
+        "title": "劳动与社会保障法",
+        "platform": "中国大学MOOC / 西北大学",
+        "kind": "公开课",
+        "why": "覆盖劳动合同、劳动基准、劳动争议处理和社会保障"
+      },
+      {
+        "title": "劳动与社会保障法：原理及案例",
+        "platform": "国家高等教育智慧教育平台",
+        "kind": "公开课",
+        "why": "用案例提示求职和在职常见劳资争议雷区"
+      },
+      {
+        "title": "劳动人事争议仲裁办案规则",
+        "platform": "司法部",
+        "kind": "文章",
+        "why": "直接对应仲裁受理、开庭、举证和裁决程序"
+      }
+    ]
+  },
+  "安全与应急 / 急救": {
+    "sub": [
+      {
+        "n": "海姆立克急救法（气道异物）",
+        "u": "https://www.bilibili.com/video/BV1Vc411z7Co",
+        "t": "海姆立克急救法 操作示范",
+        "p": 62647,
+        "f": 304
+      },
+      {
+        "n": "烧烫伤处理",
+        "u": "https://www.bilibili.com/video/BV1ab421h7v2",
+        "t": "急救课程17—烧烫伤的现场急救",
+        "p": 13660,
+        "f": 435
+      },
+      {
+        "n": "止血包扎",
+        "u": "https://www.bilibili.com/video/BV1PV411w7FA",
+        "t": "【急救】止血（上）——绷带包扎、三角巾包扎",
+        "p": 97517,
+        "f": 631
+      },
+      {
+        "n": "CPR与AED",
+        "u": "https://www.bilibili.com/video/BV1SR4y1Z7vs",
+        "t": "心肺复苏+AED急救",
+        "p": 138587,
+        "f": 4119
+      },
+      {
+        "n": "火灾逃生与灾害避险",
+        "u": "https://www.bilibili.com/video/BV1ZtXrYJEPq",
+        "t": "【消防科普】宿舍楼发生火灾，该如何逃生？",
+        "p": 310797,
+        "f": 12643
+      },
+      {
+        "n": "120沟通与报警现场评估",
+        "u": "https://www.bilibili.com/video/BV1y5411b7FP",
+        "t": "关于正确拨打120的小科普",
+        "p": 812,
+        "f": 306
+      }
+    ],
+    "tut": [
+      {
+        "title": "救在身边·红十字应急救护服务平台",
+        "platform": "中国红十字会总会训练中心",
+        "kind": "公开课",
+        "why": "含 CPR+AED、创伤救护和避险逃生课程，国内适配度高"
+      },
+      {
+        "title": "Heartsaver First Aid CPR AED",
+        "platform": "American Heart Association",
+        "kind": "公开课",
+        "why": "面向非医务人员，覆盖急救、CPR 和 AED"
+      },
+      {
+        "title": "Until Help Arrives",
+        "platform": "FEMA / Ready.gov",
+        "kind": "公开课",
+        "why": "强调专业救援到达前普通人能做的关键行动"
+      }
+    ]
+  },
+  "保险素养": {
+    "sub": [
+      {
+        "n": "保险基础",
+        "u": "https://www.bilibili.com/video/BV1tiUaBZEzZ",
+        "t": "一口气讲清楚保险—深度分析保险“骗局”背后的真相！",
+        "p": 2835215,
+        "f": 10290
+      },
+      {
+        "n": "医保与百万医疗险",
+        "u": "https://www.bilibili.com/video/BV1GR4y1e7CJ",
+        "t": "我做出了最强医疗险攻略？一次性讲透医疗险，百万医疗险/中端医疗险/高端医疗保险选购避坑完整攻略「硬核科普」",
+        "p": 389586,
+        "f": 35200
+      },
+      {
+        "n": "重疾险",
+        "u": "https://www.bilibili.com/video/BV1D54y1i7dx",
+        "t": "重疾险有没有必要买，男性高发重大疾病有哪些，听听医生怎么说！",
+        "p": 16420,
+        "f": 582
+      },
+      {
+        "n": "意外险",
+        "u": "https://www.bilibili.com/video/BV1Fe411e7LA",
+        "t": "【爆肝20小时硬核拆解全系保险的底层逻辑】-【意外险】篇 | 大人、小孩、老人、特别群体都适用，看懂逻辑和本质，才能不上当不吃亏！",
+        "p": 28079,
+        "f": 828
+      },
+      {
+        "n": "寿险与定期寿险",
+        "u": "https://www.bilibili.com/video/BV15h4y1R7ZU",
+        "t": "【科普】关于寿险那些事儿，定期寿险，增额终身寿险，杠杆型定额终身寿险，重疾险里捆绑的寿险，到底适合哪些人？应该怎么选择？",
+        "p": 26207,
+        "f": 736
+      },
+      {
+        "n": "健康告知",
+        "u": "https://www.bilibili.com/video/BV1Da41147Ne",
+        "t": "健康告知到底怎么做？（B站）",
+        "p": 9402,
+        "f": 538
+      },
+      {
+        "n": "车险与财险",
+        "u": "https://www.bilibili.com/video/BV1Dz4y1x7As",
+        "t": "【纯干货】买车险必看！保险如何选？拒赔怎么办？从选车险到理赔的一条龙服务！",
+        "p": 348495,
+        "f": 16645
+      }
+    ],
+    "tut": [
+      {
+        "title": "Insurance",
+        "platform": "Khan Academy Financial Literacy",
+        "kind": "视频",
+        "why": "用入门视频解释保险种类、风险和家庭保障配置"
+      },
+      {
+        "title": "Consumer Insurance Search",
+        "platform": "NAIC",
+        "kind": "文章",
+        "why": "可查询保险公司投诉、牌照和财务健康，适合购买前核验"
+      },
+      {
+        "title": "《保险这样买就对了》",
+        "platform": "书",
+        "kind": "书",
+        "why": "围绕普通家庭投保、产品责任和理赔常见问题展开"
+      }
+    ]
+  },
+  "房产常识": {
+    "sub": [
+      {
+        "n": "租买决策",
+        "u": "https://www.bilibili.com/video/BV151WbzUEEw",
+        "t": "买房和租房哪个更划算？",
+        "p": 56139,
+        "f": 876
+      },
+      {
+        "n": "房贷基础",
+        "u": "https://www.bilibili.com/video/BV1Ds4y1L7q8",
+        "t": "【干货】有关房贷、提前还贷的原则和注意事项，都在这里了【财经故事会】",
+        "p": 502755,
+        "f": 4348
+      },
+      {
+        "n": "首付与月供",
+        "u": "https://www.bilibili.com/video/BV1m1XzYFEc9",
+        "t": "买房首付应该付多少？一个视频说清楚",
+        "p": 48534,
+        "f": 396
+      },
+      {
+        "n": "公积金贷款",
+        "u": "https://www.bilibili.com/video/BV1VF411X7TV",
+        "t": "打工人必看！B站最全公积金科普，买房、租房、就医统统都能使用，用好省下几十万",
+        "p": 546087,
+        "f": 11740
+      },
+      {
+        "n": "交易流程",
+        "u": "https://www.bilibili.com/video/BV19Y4YeCEY3",
+        "t": "二手房购买流程（上）！最新最完整的交易流程详解",
+        "p": 48002,
+        "f": 982
+      },
+      {
+        "n": "税费与成交成本",
+        "u": "https://www.bilibili.com/video/BV1n54y1r7qX",
+        "t": "二手房税费详解，买房必备，保姆级教程",
+        "p": 24965,
+        "f": 1180
+      },
+      {
+        "n": "产权与学区",
+        "u": "https://www.bilibili.com/video/BV1rL411M79W",
+        "t": "你买的房子70年地产权到期了怎么办？",
+        "p": 199207,
+        "f": 3036
+      }
+    ],
+    "tut": [
+      {
+        "title": "Housing",
+        "platform": "Khan Academy",
+        "kind": "视频",
+        "why": "用视频讲租房 vs 买房、房贷和购房流程"
+      },
+      {
+        "title": "Buying a house",
+        "platform": "Consumer Financial Protection Bureau",
+        "kind": "文章",
+        "why": "按买房步骤讲预算、贷款、报价、成交和问题清单"
+      },
+      {
+        "title": "Your home loan toolkit",
+        "platform": "CFPB",
+        "kind": "文章",
+        "why": "帮助理解房贷选择、成交成本和持有住房事项"
+      }
+    ]
+  },
+  "数字安全与防诈骗": {
+    "sub": [
+      {
+        "n": "设备更新",
+        "u": "https://www.bilibili.com/video/BV1Bs4y1g7NC",
+        "t": "(最新)系统更新究竟要不要更？如何关闭更新——一个视频说清楚系统更新这些事",
+        "p": 239182,
+        "f": 5365
+      },
+      {
+        "n": "隐私权限",
+        "u": "https://www.bilibili.com/video/BV1s44y1i75X",
+        "t": "手机APP权限，会不会窃取我们隐私？",
+        "p": 582020,
+        "f": 4108
+      },
+      {
+        "n": "密码与多因素认证",
+        "u": "https://www.bilibili.com/video/BV1JK411h7PZ",
+        "t": "五分钟带你配置Github 2FA双因素认证",
+        "p": 19417,
+        "f": 169
+      },
+      {
+        "n": "钓鱼识别",
+        "u": "https://www.bilibili.com/video/BV1Hy4y1G7kj",
+        "t": "【防骗】我黑了钓鱼网站？解析流行钓鱼网站套路！",
+        "p": 13755,
+        "f": 239
+      },
+      {
+        "n": "反诈App",
+        "u": "https://www.bilibili.com/video/BV1c3411v7g8",
+        "t": "国家反诈中心APP好用吗？up亲身体验揭晓“反诈利器”的秘密",
+        "p": 280327,
+        "f": 1232
+      },
+      {
+        "n": "电信网络诈骗",
+        "u": "https://www.bilibili.com/video/BV1ZyNte5Eq9",
+        "t": "细思恐极，2025年电信诈骗套路",
+        "p": 833624,
+        "f": 11627
+      },
+      {
+        "n": "报案与止损",
+        "u": "https://www.bilibili.com/video/BV1Sa4y1x7qa",
+        "t": "【半佛】为什么追回诈骗赃款这么难？",
+        "p": 3488043,
+        "f": 3780
+      }
+    ],
+    "tut": [
+      {
+        "title": "Cybersecurity: Crash Course Computer Science #31",
+        "platform": "Crash Course / YouTube",
+        "kind": "视频",
+        "why": "用十多分钟解释网络安全的保密性、完整性和可用性"
+      },
+      {
+        "title": "Secure Our World",
+        "platform": "CISA",
+        "kind": "文章",
+        "why": "把个人数字安全浓缩为强密码、MFA、更新和识别钓鱼等行动"
+      },
+      {
+        "title": "防范电信网络诈骗宣传手册",
+        "platform": "公安部刑侦局 / 国家反诈中心",
+        "kind": "文章",
+        "why": "贴近国内高发骗局和反诈工具，适合实操防骗"
+      }
+    ]
+  },
+  "法律常识": {
+    "sub": [
+      {
+        "n": "法律援助",
+        "u": "https://www.bilibili.com/video/BV1w3411W7PR",
+        "t": "程滔教授解读：法律援助法的亮点",
+        "p": 2184,
+        "f": 64
+      },
+      {
+        "n": "租房纠纷",
+        "u": "https://www.bilibili.com/video/BV1pa4y1t71L",
+        "t": "告别零散的知识点！房屋租赁法律问题全面讲解 带你看合同（第5集）【晓天律师】",
+        "p": 19459,
+        "f": 906
+      },
+      {
+        "n": "消费者权益",
+        "u": "https://www.bilibili.com/video/BV1My4y1m7gw",
+        "t": "消费者权益保护法普法",
+        "p": 37950,
+        "f": 605
+      },
+      {
+        "n": "婚姻家庭",
+        "u": "https://www.bilibili.com/video/BV1nr4y1x7Sn",
+        "t": "【民法典系列课堂】生活中的法律问题，这里基本都有答案",
+        "p": 78737,
+        "f": 3847
+      },
+      {
+        "n": "诉讼与证据",
+        "u": "https://www.bilibili.com/video/BV1rh4y1R7Fk",
+        "t": "民事诉讼证据实务运用指南",
+        "p": 63838,
+        "f": 5392
+      },
+      {
+        "n": "民法典基础",
+        "u": "https://www.bilibili.com/video/BV1kipteaETi",
+        "t": "《中华人民共和国民法典》全文诵读学习-磨耳朵",
+        "p": 332440,
+        "f": 8927
+      },
+      {
+        "n": "合同与侵权",
+        "u": "https://www.bilibili.com/video/BV1Z7yzBJERB",
+        "t": "【字幕完结版】2026年法考客观题【精讲卷】民法 众合孟献贵",
+        "p": 18097692,
+        "f": 105894
+      }
+    ],
+    "tut": [
+      {
+        "title": "法律讲堂（生活版）",
+        "platform": "CCTV / 央视网",
+        "kind": "视频",
+        "why": "用生活案例讲遇到事情怎么办、解决途径有哪些"
+      },
+      {
+        "title": "民法学",
+        "platform": "中国大学MOOC / 天津大学",
+        "kind": "公开课",
+        "why": "系统介绍民法总论、物权、债权、人身权和民事责任"
+      },
+      {
+        "title": "中华人民共和国民法典",
+        "platform": "司法部",
+        "kind": "文章",
+        "why": "查民事权利、合同、人格权、婚姻家庭和继承的基础文本"
+      }
+    ]
+  },
+  "行政 / 社保公积金 / 个税": {
+    "sub": [
+      {
+        "n": "社保查询",
+        "u": "https://www.bilibili.com/video/BV1Uh41187Fw",
+        "t": "手把手教你社保实务操作",
+        "p": 36405,
+        "f": 40
+      },
+      {
+        "n": "社保转移",
+        "u": "https://www.bilibili.com/video/BV13S4y1M7F5",
+        "t": "打工人必看！一次说清社保转移如何操作！",
+        "p": 1191018,
+        "f": 91067
+      },
+      {
+        "n": "公积金提取贷款",
+        "u": "https://www.bilibili.com/video/BV1RbBPBYESF",
+        "t": "公积金提取方法教程",
+        "p": 34120,
+        "f": 5
+      },
+      {
+        "n": "居住证办理",
+        "u": "https://www.bilibili.com/video/BV1P3411K7Lx",
+        "t": "办理居住证，你需要这两样东西",
+        "p": 5004,
+        "f": 5
+      },
+      {
+        "n": "政务平台使用",
+        "u": "https://www.bilibili.com/video/BV1tH4y1S7D3",
+        "t": "一网通办：内资企业设立",
+        "p": 9217,
+        "f": 93
+      },
+      {
+        "n": "个税专项附加扣除",
+        "u": "https://www.bilibili.com/video/BV1Wv4y1976V",
+        "t": "说人话！10分钟学会个人所得税怎么算，专项附加扣除是什么？打工人工资里的个税小知识都在这里！",
+        "p": 253191,
+        "f": 7237
+      },
+      {
+        "n": "个税年度汇算",
+        "u": "https://www.bilibili.com/video/BV1xfXoY5EvQ",
+        "t": "一口气，带你看懂个税汇算！",
+        "p": 9440,
+        "f": 243
+      }
+    ],
+    "tut": [
+      {
+        "title": "税务讲堂：个人所得税综合所得年度汇算视频解读",
+        "platform": "国家税务总局",
+        "kind": "视频",
+        "why": "用视频讲年度汇算、补税退税和预约办理流程"
+      },
+      {
+        "title": "国家社会保险公共服务平台",
+        "platform": "人力资源和社会保障部",
+        "kind": "文章",
+        "why": "用于查询权益记录、参保证明、养老转移和资格认证"
+      },
+      {
+        "title": "个人所得税专项附加扣除操作办法",
+        "platform": "国家税务总局",
+        "kind": "文章",
+        "why": "讲清子女教育、继续教育、住房、赡养老人等扣除规则"
+      }
+    ]
+  },
+  "驾驶与交通安全": {
+    "sub": [
+      {
+        "n": "交通法规与12123处理",
+        "u": "https://www.bilibili.com/video/BV1hVGPzVEV9",
+        "t": "30分钟学完科目一，2025最新驾照科目一科一满分，轻轻松松拿下",
+        "p": 4646926,
+        "f": 195091
+      },
+      {
+        "n": "酒驾与疲劳驾驶",
+        "u": "https://www.bilibili.com/video/BV1xP411v7rC",
+        "t": "你的汽车，是怎么发现你在疲劳驾驶的？",
+        "p": 1653951,
+        "f": 15936
+      },
+      {
+        "n": "防御性驾驶",
+        "u": "https://www.bilibili.com/video/BV1upf2BcEzq",
+        "t": "防御性驾驶首先要做好控速",
+        "p": 430008,
+        "f": 1054
+      },
+      {
+        "n": "儿童乘员安全",
+        "u": "https://www.bilibili.com/video/BV1Ba4y1e7Lg",
+        "t": "基本上没人装，儿童安全座椅有必要吗",
+        "p": 225028,
+        "f": 1104
+      },
+      {
+        "n": "行人与非机动车规则",
+        "u": "https://www.bilibili.com/video/BV1NX4y1i7Wa",
+        "t": "9:39",
+        "p": 87527,
+        "f": 579
+      },
+      {
+        "n": "高速事故应急处置",
+        "u": "https://www.bilibili.com/video/BV1814y1e7gW",
+        "t": "16:57",
+        "p": 12615,
+        "f": 1017
+      }
+    ],
+    "tut": [
+      {
+        "title": "知危险会避险交通安全主题课",
+        "platform": "央视频 / 公安部交管局",
+        "kind": "视频",
+        "why": "用案例和动画讲交通风险识别，适合家庭和新手司机补课"
+      },
+      {
+        "title": "Road Safety",
+        "platform": "NHTSA",
+        "kind": "文章",
+        "why": "覆盖酒驾、分心驾驶、超速、儿童安全和行人安全"
+      },
+      {
+        "title": "The Highway Code",
+        "platform": "GOV.UK",
+        "kind": "文章",
+        "why": "系统理解道路参与者规则、标志和安全通行原则"
+      }
+    ]
+  },
+  "食品配料表与营养标签解读": {
+    "sub": [
+      {
+        "n": "营养成分表与NRV解读",
+        "u": "https://www.bilibili.com/video/BV1k44y147na",
+        "t": "【顾中一】8分钟看懂营养成分表，你看对了吗？",
+        "p": 897658,
+        "f": 4953
+      },
+      {
+        "n": "配料表顺序与添加剂识别",
+        "u": "https://www.bilibili.com/video/BV1pd4y1o7XJ",
+        "t": "如何读懂食品配料表？这两种成分靠前时 谨慎购买！",
+        "p": 119400,
+        "f": 3174
+      },
+      {
+        "n": "隐形糖与0糖声称识别",
+        "u": "https://www.bilibili.com/video/BV1wmfKYGEHv",
+        "t": "“0糖”但有糖，“0添加”但有添加，误导式宣传即将被国家消灭掉！【雪鸡观察局352】",
+        "p": 438854,
+        "f": 996
+      },
+      {
+        "n": "反式脂肪与氢化植物油识别",
+        "u": "https://www.bilibili.com/video/BV1Zr42177FB",
+        "t": "反式脂肪酸对大脑有直接毒性！读懂配料表里隐藏的反式脂肪酸",
+        "p": 69474,
+        "f": 517
+      },
+      {
+        "n": "GB 28050营养标签国标解读",
+        "u": "https://www.bilibili.com/video/BV1MVEEzwEbU",
+        "t": "GB 28050-2025 预包装食品营养标签通则，直播自留学习",
+        "p": 2399,
+        "f": 154
+      },
+      {
+        "n": "营养声称与保健食品蓝帽子",
+        "u": "https://www.bilibili.com/video/BV1CB4y1s7Wa",
+        "t": "保健品（一）- 保健品定义以及监管",
+        "p": 3332,
+        "f": 476
+      }
+    ],
+    "tut": [
+      {
+        "title": "Food for Thought - How to Use the Nutrition Facts Label",
+        "platform": "FDA / YouTube",
+        "kind": "视频",
+        "why": "短视频演示如何把营养标签用于购物选择"
+      },
+      {
+        "title": "How to Understand and Use the Nutrition Facts Label",
+        "platform": "FDA",
+        "kind": "文章",
+        "why": "逐项解释 serving size、calories、added sugars 和 %DV"
+      },
+      {
+        "title": "中国居民膳食指南（2022）",
+        "platform": "中国营养学会",
+        "kind": "文章",
+        "why": "把标签解读放回整体膳食结构，避免只盯单一营养素"
+      }
+    ]
+  },
+  "口腔牙周健康与看牙求生": {
+    "sub": [
+      {
+        "n": "刷牙与牙线",
+        "u": "https://www.bilibili.com/video/BV1WL4y177Qh",
+        "t": "用电动牙刷怎么刷牙？",
+        "p": 151349,
+        "f": 9.48
+      },
+      {
+        "n": "龋齿与根管治疗",
+        "u": "https://www.bilibili.com/video/BV1B24nejE8L",
+        "t": "【根管治疗】活牙变死牙？抽神经是怎样一种体验？",
+        "p": 308709,
+        "f": 2770
+      },
+      {
+        "n": "洁牙与洗牙周期",
+        "u": "https://www.bilibili.com/video/BV1C44y1476C",
+        "t": "超声波洁牙的操作手法",
+        "p": 151169,
+        "f": 5.25
+      },
+      {
+        "n": "牙周炎识别",
+        "u": "https://www.bilibili.com/video/BV1xu411T7sh",
+        "t": "如何预防和治疗牙龈炎和牙周炎。",
+        "p": 45535,
+        "f": 10.72
+      },
+      {
+        "n": "牙科费用与过度治疗",
+        "u": "https://www.bilibili.com/video/BV1xB4y1U7Sd",
+        "t": "【36氪】看牙很贵？牙医暴利可能是最大的误区",
+        "p": 286325,
+        "f": 3916
+      },
+      {
+        "n": "种植牙风险与常识",
+        "u": "https://www.bilibili.com/video/BV1bx411b7e9",
+        "t": "史上最强！12分钟了解种植牙全过程，快来围观",
+        "p": 261435,
+        "f": 12.13
+      }
+    ],
+    "tut": [
+      {
+        "title": "How to Brush Your Teeth",
+        "platform": "American Dental Association / YouTube",
+        "kind": "视频",
+        "why": "用演示视频纠正常见刷牙姿势错误"
+      },
+      {
+        "title": "Brushing Your Teeth / Flossing",
+        "platform": "ADA MouthHealthy",
+        "kind": "文章",
+        "why": "给出刷牙角度、频次、牙线使用等基础动作"
+      },
+      {
+        "title": "Periodontal Gum Disease",
+        "platform": "NIDCR / NIH",
+        "kind": "文章",
+        "why": "讲牙周病原因、症状、进展和治疗，适合看牙前预习"
+      }
+    ]
+  },
+  "体检报告解读与异常指标处理": {
+    "sub": [
+      {
+        "n": "正常范围与参考区间",
+        "u": "https://www.bilibili.com/video/BV1L24y1u7Fj",
+        "t": "【科普】超详细体检报告及指标解读",
+        "p": 445418,
+        "f": 43895
+      },
+      {
+        "n": "血常规",
+        "u": "https://www.bilibili.com/video/BV1Ud4y1i7FU",
+        "t": "最全血常规解读-暴虐带教老师系列",
+        "p": 278009,
+        "f": 20243
+      },
+      {
+        "n": "肝肾功能",
+        "u": "https://www.bilibili.com/video/BV1gs4y1C7K5",
+        "t": "肝功能、肾功能的快速解读——菜鸟必学的辅助检查第3节",
+        "p": 92131,
+        "f": 3902
+      },
+      {
+        "n": "血脂血糖",
+        "u": "https://www.bilibili.com/video/BV1UM4y1i7pK",
+        "t": "瘦子竟会高血脂？“老年病”开始盯上年轻人【医生体检报告大公开】",
+        "p": 1035269,
+        "f": 6155
+      },
+      {
+        "n": "尿检",
+        "u": "https://www.bilibili.com/video/BV1ms4y1V7Gy",
+        "t": "尿检究竟是在检什么？6分钟体验尿检全过程",
+        "p": 247882,
+        "f": 4.15
+      },
+      {
+        "n": "结节随访与肿瘤标志物",
+        "u": "https://www.bilibili.com/video/BV1ucJDzWET5",
+        "t": "肿瘤标志物有必要查吗？体检报告里哪些项目不用太在意？",
+        "p": 692513,
+        "f": 4555
+      },
+      {
+        "n": "异常复查与转诊",
+        "u": "https://www.bilibili.com/video/BV1Zt421N7vF",
+        "t": "体检报告上的8大异常，医生带您详细解读，有些问题要重点关注",
+        "p": 28682,
+        "f": 2027
+      }
+    ],
+    "tut": [
+      {
+        "title": "Vital Signs: Understanding What the Body Is Telling Us",
+        "platform": "University of Pennsylvania / Coursera",
+        "kind": "公开课",
+        "why": "帮助理解血压、心率、体温、呼吸和疼痛这些基础生命体征"
+      },
+      {
+        "title": "Medical Tests",
+        "platform": "MedlinePlus",
+        "kind": "文章",
+        "why": "按检查项目解释用途、结果含义和准备事项"
+      },
+      {
+        "title": "Common Medical Tests",
+        "platform": "Merck Manual Consumer Version",
+        "kind": "文章",
+        "why": "用消费者语言解释常见检查类型、风险和结果"
+      }
+    ]
+  },
+  "居家安全（燃气/用电/一氧化碳）": {
+    "sub": [
+      {
+        "n": "一氧化碳报警器",
+        "u": "https://www.bilibili.com/video/BV1av4y1A7Cd",
+        "t": "一氧化碳——安静的杀手【毒物百科.12期】",
+        "p": 97591,
+        "f": 1011
+      },
+      {
+        "n": "烟雾报警器",
+        "u": "https://www.bilibili.com/video/BV1tT411c7FE",
+        "t": "烟感安装教程视频",
+        "p": 7436,
+        "f": 15
+      },
+      {
+        "n": "燃气软管",
+        "u": "https://www.bilibili.com/video/BV1z3411A74b",
+        "t": "燃气专用不锈钢波纹管安装教程注意事项，先码起来！",
+        "p": 43306,
+        "f": 443
+      },
+      {
+        "n": "燃气通风与泄漏预防",
+        "u": "https://www.bilibili.com/video/BV19W4y1v7sL",
+        "t": "6:10",
+        "p": 13749,
+        "f": 1
+      },
+      {
+        "n": "用电过载与插线板负载",
+        "u": "https://www.bilibili.com/video/BV1Ys411R7xU",
+        "t": "10:14",
+        "p": 44988,
+        "f": 1
+      },
+      {
+        "n": "火灾逃生",
+        "u": "https://www.bilibili.com/video/BV1Qv421v7uk",
+        "t": "火灾逃生自救方法",
+        "p": 28978,
+        "f": 507
+      }
+    ],
+    "tut": [
+      {
+        "title": "Fire Safety - Have Two Ways Out",
+        "platform": "FEMA / YouTube",
+        "kind": "视频",
+        "why": "强调家庭火灾逃生计划和两条逃生路线"
+      },
+      {
+        "title": "Carbon Monoxide Poisoning Basics",
+        "platform": "CDC",
+        "kind": "文章",
+        "why": "解释一氧化碳无色无味、症状和预防要点"
+      },
+      {
+        "title": "Electrical Home Fire Safety",
+        "platform": "NFPA",
+        "kind": "文章",
+        "why": "覆盖插座、电器、延长线和家庭电气火灾预防"
+      }
+    ]
+  },
+  "消费维权实操（退款/投诉/举证）": {
+    "sub": [
+      {
+        "n": "七天无理由退货",
+        "u": "https://www.bilibili.com/video/BV11uenziE8w",
+        "t": "七天无理由退货，你用对了吗",
+        "p": 793,
+        "f": -1
+      },
+      {
+        "n": "退款协商话术",
+        "u": "https://www.bilibili.com/video/BV1gGKQ6mEZk",
+        "t": "杨副总618网购被坑，如何维权让商家低头",
+        "p": 16195,
+        "f": -1
+      },
+      {
+        "n": "平台客服升级",
+        "u": "https://www.bilibili.com/video/BV1VY4y177LK",
+        "t": "维权系列--杠上淘宝客服",
+        "p": 6941,
+        "f": -1
+      },
+      {
+        "n": "12315投诉",
+        "u": "https://www.bilibili.com/video/BV1eL4y187U5",
+        "t": "用12315投诉没效果？告诉你个小方法，商家立马妥协，好用率80%",
+        "p": 510823,
+        "f": 7188
+      },
+      {
+        "n": "虚假宣传认定",
+        "u": "https://www.bilibili.com/video/BV1xh756FE3e",
+        "t": "车企发布会狂吹“地表最强”、“最好“、”第一“ 广告法管不住吗？律师：确实管不住，今天把广告法适用范围边界一次性讲透！",
+        "p": 28740,
+        "f": 142
+      },
+      {
+        "n": "预付卡跑路维权",
+        "u": "https://www.bilibili.com/video/BV1qC411a7e9",
+        "t": "商家跑路，成功拿回预付款经验分享",
+        "p": 4795,
+        "f": -1
+      },
+      {
+        "n": "举证与诉讼",
+        "u": "https://www.bilibili.com/video/BV1e4421f72y",
+        "t": "律师教你闲鱼买二手翻车后如何起诉！全干货保姆级攻略，建议收藏！",
+        "p": 70984,
+        "f": 1513
+      }
+    ],
+    "tut": [
+      {
+        "title": "中央广播电视总台3·15晚会",
+        "platform": "央视频",
+        "kind": "视频",
+        "why": "通过真实案例学习消费陷阱、取证和维权关注点"
+      },
+      {
+        "title": "全国12315平台",
+        "platform": "国家市场监督管理总局体系",
+        "kind": "文章",
+        "why": "国内消费投诉举报的核心入口，适合实操维权"
+      },
+      {
+        "title": "中华人民共和国消费者权益保护法",
+        "platform": "国家市场监督管理总局",
+        "kind": "文章",
+        "why": "查七日无理由、欺诈赔偿、经营者义务等基础权利"
+      }
+    ]
+  },
+  "信用与贷款常识": {
+    "sub": [
+      {
+        "n": "APR与利率",
+        "u": "https://www.bilibili.com/video/BV1ct4y1Z7Sb",
+        "t": "【公司理财】年化百分比利率APR和实际年利率EAR(APR是单利年化利率？复利计息次数有什么影响？)",
+        "p": 12028,
+        "f": 232
+      },
+      {
+        "n": "信用评分",
+        "u": "https://www.bilibili.com/video/BV1z7411c7FD",
+        "t": "18:48",
+        "p": 4419,
+        "f": 18.8
+      },
+      {
+        "n": "信用报告与征信",
+        "u": "https://www.bilibili.com/video/BV1eb4y1d74b",
+        "t": "14:49",
+        "p": 74737,
+        "f": 14.82
+      },
+      {
+        "n": "信用卡",
+        "u": "https://www.bilibili.com/video/BV1PH4y1d7e2",
+        "t": "天涯杂谈 | 天涯神贴：其实，你对信用卡一无所知！看完这个视频，或许你会冷汗直流，或许会发现新大陆！",
+        "p": 238601,
+        "f": 3388
+      },
+      {
+        "n": "房贷与消费贷",
+        "u": "https://www.bilibili.com/video/BV1J2D8YDEAX",
+        "t": "房贷利率降不动了？3%成银行红线，利率新规下，怎么还房贷更合理？",
+        "p": 457771,
+        "f": 1534
+      },
+      {
+        "n": "逾期与征信修复",
+        "u": "https://www.bilibili.com/video/BV1hC4y1e7Cy",
+        "t": "5:13",
+        "p": 21467,
+        "f": 5.22
+      },
+      {
+        "n": "担保连带责任",
+        "u": "https://www.bilibili.com/video/BV1tU4y1m77B",
+        "t": "听课之前，我以为我是懂连带责任的😳",
+        "p": 45028,
+        "f": 1148
+      }
+    ],
+    "tut": [
+      {
+        "title": "Interest and debt",
+        "platform": "Khan Academy Personal Finance",
+        "kind": "视频",
+        "why": "从利息、信用基础、信用卡贷款和还债讲起"
+      },
+      {
+        "title": "Credit reports and scores",
+        "platform": "CFPB",
+        "kind": "文章",
+        "why": "讲信用报告、分数、错误更正和信用记录改善"
+      },
+      {
+        "title": "Understanding FICO Scores",
+        "platform": "myFICO",
+        "kind": "文章",
+        "why": "解释 FICO 分数范围、影响因素和贷款利率关联"
+      }
+    ]
+  },
+  "医保报销规则与就医省钱": {
+    "sub": [
+      {
+        "n": "医保电子凭证",
+        "u": "https://www.bilibili.com/video/BV1iY4y1B7ZR",
+        "t": "如何激活你的医保电子凭证？",
+        "p": 19868,
+        "f": 51
+      },
+      {
+        "n": "医保目录与药品目录",
+        "u": "https://www.bilibili.com/video/BV1eY411L7Kk",
+        "t": "如何通过小程序查询医保目录甲类药乙类药，医保报销药品报销",
+        "p": 5361,
+        "f": 41
+      },
+      {
+        "n": "报销比例",
+        "u": "https://www.bilibili.com/video/BV18T421y7v1",
+        "t": "手把手教你计算医保报销金额",
+        "p": 3443,
+        "f": 12
+      },
+      {
+        "n": "起付线与封顶线",
+        "u": "https://www.bilibili.com/video/BV17wdwY1EB5",
+        "t": "医保报销起付线：门诊🆚住院❓小孩🆚大人❓",
+        "p": 2171,
+        "f": 6
+      },
+      {
+        "n": "门诊统筹",
+        "u": "https://www.bilibili.com/video/BV1CG411S7p6",
+        "t": "居民医保的惊喜：门诊额度与牙齿报销全攻略",
+        "p": 97749,
+        "f": 6
+      },
+      {
+        "n": "异地就医备案",
+        "u": "https://www.bilibili.com/video/BV1yvSyYhEPt",
+        "t": "异地就医也能用医保，别在外地傻傻的自费看病买药啦",
+        "p": 110398,
+        "f": 8
+      },
+      {
+        "n": "家庭共济与大病保险",
+        "u": "https://www.bilibili.com/video/BV1xP4y1Q77J",
+        "t": "医保家庭共济，全网最全科普",
+        "p": 72695,
+        "f": 888
+      }
+    ],
+    "tut": [
+      {
+        "title": "医保支付小课堂",
+        "platform": "国家医疗保障局",
+        "kind": "视频",
+        "why": "用视频回放和问答讲医保支付、基金监管和价格政策"
+      },
+      {
+        "title": "医保政策问答手册",
+        "platform": "国家医疗保障局",
+        "kind": "文章",
+        "why": "用问答讲参保缴费、待遇报销、异地就医等高频问题"
+      },
+      {
+        "title": "跨省异地就医如何直接报销？",
+        "platform": "国家医疗保障局",
+        "kind": "文章",
+        "why": "适合处理异地备案、直接结算和报销比例问题"
+      }
+    ]
+  },
+  "遗嘱与财产传承": {
+    "sub": [
+      {
+        "n": "法定继承顺位",
+        "u": "https://www.bilibili.com/video/BV1cNh6eDEGA",
+        "t": "还搞不懂遗产怎么分？来！10分钟速通析产与继承！【法律与生活】",
+        "p": 10587,
+        "f": 245
+      },
+      {
+        "n": "遗嘱形式",
+        "u": "https://www.bilibili.com/video/BV1ay4y197PG",
+        "t": "【獬豸漫笔】遗嘱入门指南",
+        "p": 551738,
+        "f": 44708
+      },
+      {
+        "n": "自书遗嘱",
+        "u": "https://www.bilibili.com/video/BV1HS4y1E7Dt",
+        "t": "【獬豸漫笔】手把手教大家写遗嘱",
+        "p": 1359441,
+        "f": 89402
+      },
+      {
+        "n": "夫妻共同财产",
+        "u": "https://www.bilibili.com/video/BV1jM411P7oW",
+        "t": "【法律与生活】夫妻共同财产和个人财产、共同债务和个人债务的区分，易混重难点高中政治选必2",
+        "p": 30604,
+        "f": 542
+      },
+      {
+        "n": "房产继承",
+        "u": "https://www.bilibili.com/video/BV1MK421k7qv",
+        "t": "亲人去世后遗产房怎么继承？公证继承和诉讼继承,到底怎么选择？",
+        "p": 6361,
+        "f": 100
+      },
+      {
+        "n": "数字遗产",
+        "u": "https://www.bilibili.com/video/BV1JQ4y1Q7GT",
+        "t": "数字遗产到底该怎么处理？我花4位数耗2个月立了份遗嘱｜我有个想法",
+        "p": 184500,
+        "f": 3695
+      },
+      {
+        "n": "保单受益人",
+        "u": "https://www.bilibili.com/video/BV1Um4y1x7pN",
+        "t": "投保人、保险人、被保险人和受益人，一次性帮你弄清楚!",
+        "p": 5678,
+        "f": 43
+      }
+    ],
+    "tut": [
+      {
+        "title": "婚姻家庭继承法",
+        "platform": "中国大学MOOC / 北京化工大学",
+        "kind": "公开课",
+        "why": "系统讲婚姻法与继承法，适合非法学背景入门"
+      },
+      {
+        "title": "中华人民共和国民法典 第六编 继承",
+        "platform": "最高人民检察院 / 新华网",
+        "kind": "文章",
+        "why": "查继承开始、遗产范围、法定继承和遗嘱继承的原文依据"
+      },
+      {
+        "title": "公证指南：如何订立一份有效遗嘱？",
+        "platform": "北京市公证协会",
+        "kind": "文章",
+        "why": "从公证视角解释有效遗嘱的订立注意事项"
+      }
+    ]
+  },
+  "科学减脂与体重管理认知": {
+    "sub": [
+      {
+        "n": "BMI与腰围健康指标",
+        "u": "https://www.bilibili.com/video/BV1Fhjm6LEDD",
+        "t": "肥胖标准降了？怎么控体重？",
+        "p": 56634,
+        "f": 6.85
+      },
+      {
+        "n": "能量平衡与热量缺口",
+        "u": "https://www.bilibili.com/video/BV1CT42167gj",
+        "t": "减肥时，我要消耗多少热量？",
+        "p": 64311,
+        "f": 10.02
+      },
+      {
+        "n": "蛋白质与饱腹",
+        "u": "https://www.bilibili.com/video/BV1sN411K7aH",
+        "t": "你真的需要喝蛋白粉吗？这三种人需要！这三种人不需要！",
+        "p": 996071,
+        "f": 5636
+      },
+      {
+        "n": "力量训练入门",
+        "u": "https://www.bilibili.com/video/BV1Hk4y187jF",
+        "t": "B站版《健身新手的训练完全手册》",
+        "p": 4994404,
+        "f": 410669
+      },
+      {
+        "n": "有氧活动与燃脂",
+        "u": "https://www.bilibili.com/video/BV1KFkjYTEd5",
+        "t": "【健身科普】有氧运动排名，如何减脂又不掉肌肉",
+        "p": 1353541,
+        "f": 24084
+      },
+      {
+        "n": "睡眠压力与皮质醇",
+        "u": "https://www.bilibili.com/video/BV1Qk4y1L77Z",
+        "t": "胖了两年半，我终于悟了！｜压力肥｜皮质醇与长期健康｜如何改善",
+        "p": 45654,
+        "f": 1153
+      },
+      {
+        "n": "减脂避坑与代餐智商税",
+        "u": "https://www.bilibili.com/video/BV1PLXCYTE9L",
+        "t": "别再被骗了！这些网红减肥产品正在伤害你",
+        "p": 872824,
+        "f": 14377
+      }
+    ],
+    "tut": [
+      {
+        "title": "Stanford Introduction to Food and Health",
+        "platform": "Stanford Online / Coursera",
+        "kind": "公开课",
+        "why": "强调真实食物、饮食环境和可执行饮食改变，适合减脂前建立认知"
+      },
+      {
+        "title": "About Healthy Weight and Growth",
+        "platform": "CDC",
+        "kind": "文章",
+        "why": "把健康饮食、运动、睡眠和压力管理一起纳入体重管理"
+      },
+      {
+        "title": "Body Weight Planner",
+        "platform": "NIDDK / NIH",
+        "kind": "文章",
+        "why": "用个人身高体重、活动量和目标估算热量与体重变化"
+      }
+    ]
+  },
+  "经济学与激励理论": {
+    "sub": [
+      {
+        "n": "机会成本与边际",
+        "u": "https://www.bilibili.com/video/BV1t5411A7Sp",
+        "t": "边际成本VS边际效益，如何做最好的决策",
+        "p": 84303,
+        "f": 3157
+      },
+      {
+        "n": "供需与价格",
+        "u": "https://www.bilibili.com/video/BV1BZ4y1x7YU",
+        "t": "经济：经济图像之—供需曲线",
+        "p": 129801,
+        "f": 3849
+      },
+      {
+        "n": "激励与反激励",
+        "u": "https://www.bilibili.com/video/BV1aK411w7sN",
+        "t": "1-4 委托代理理论（摸鱼的理论基础）",
+        "p": 6556,
+        "f": 76
+      },
+      {
+        "n": "行为偏误",
+        "u": "https://www.bilibili.com/video/BV1Fs411P7Ym",
+        "t": "【心理学/思维】认知偏误(cognitive bias)-wiphi批判性思维系列(critical thinking)",
+        "p": 60748,
+        "f": 31
+      },
+      {
+        "n": "制度与博弈",
+        "u": "https://www.bilibili.com/video/BV1eK4y1D7ku",
+        "t": "博弈论：喵喵学长的博弈论公开课",
+        "p": 241887,
+        "f": 13131
+      }
+    ],
+    "tut": [
+      {
+        "title": "Principles of Microeconomics",
+        "platform": "MIT OpenCourseWare",
+        "kind": "公开课",
+        "why": "系统入门微观经济学，建立价格、市场和政策分析框架"
+      },
+      {
+        "title": "Principles of Economics: Microeconomics",
+        "platform": "Marginal Revolution University",
+        "kind": "公开课",
+        "why": "视频短、案例多，适合理解机会成本、边际思维和激励"
+      },
+      {
+        "title": "《Nudge: The Final Edition》",
+        "platform": "书",
+        "kind": "书",
+        "why": "入门选择架构、默认选项和行为经济学的现实影响"
+      }
+    ]
+  },
+  "概率与风险 / 期望值思维": {
+    "sub": [
+      {
+        "n": "概率基础",
+        "u": "https://www.bilibili.com/video/BV1N54y1B7SK",
+        "t": "概率论基础（已完结）",
+        "p": 96421,
+        "f": 4664
+      },
+      {
+        "n": "条件概率与贝叶斯",
+        "u": "https://www.bilibili.com/video/BV1E34y1x7cL",
+        "t": "条件概率学不懂？一哥20分钟包教包会用！",
+        "p": 5464738,
+        "f": 148356
+      },
+      {
+        "n": "期望值思维",
+        "u": "https://www.bilibili.com/video/BV1mFo7BvEEj",
+        "t": "【概率】随机变量与分布列！期望与方差！一课搞定！",
+        "p": 1639046,
+        "f": 36252
+      },
+      {
+        "n": "统计推断",
+        "u": "https://www.bilibili.com/video/BV1DP411a732",
+        "t": "30分钟拿下区间估计与假设检验",
+        "p": 659029,
+        "f": 27387
+      },
+      {
+        "n": "风险与尾部风险",
+        "u": "https://www.bilibili.com/video/BV1VeyrB7EEA",
+        "t": "每日一本书：精读《黑天鹅》90%的人输在看不见的风险上，掌握这3招反败为胜",
+        "p": 8920,
+        "f": 344
+      },
+      {
+        "n": "决策树分析",
+        "u": "https://www.bilibili.com/video/BV1T7411b7DG",
+        "t": "【数据挖掘】决策树零基础入门教程，手把手教你学决策树！",
+        "p": 421799,
+        "f": 16003
+      }
+    ],
+    "tut": [
+      {
+        "title": "Statistics 110: Probability",
+        "platform": "Harvard University / YouTube / edX",
+        "kind": "公开课",
+        "why": "概率论经典入门课，适合建立严谨但直观的随机思维"
+      },
+      {
+        "title": "Statistics and Probability",
+        "platform": "Khan Academy",
+        "kind": "视频",
+        "why": "零门槛分单元练习概率、统计和数据解释"
+      },
+      {
+        "title": "《Thinking in Bets》",
+        "platform": "书",
+        "kind": "书",
+        "why": "把生活决策拆成概率、信息质量和结果归因"
+      }
+    ]
+  },
+  "社会心理学与影响力": {
+    "sub": [
+      {
+        "n": "从众与服从",
+        "u": "https://www.bilibili.com/video/BV1cysYeJE9Q",
+        "t": "三个心理学实验解读：从众心理如何操弄我们【清华心理学概论笔记】8.3",
+        "p": 7087,
+        "f": 355
+      },
+      {
+        "n": "认知失调",
+        "u": "https://www.bilibili.com/video/BV1qT4y137Cb",
+        "t": "什么是认知失调？| 如何利用认知失调影响他人的行为及想法？| 实用心理学",
+        "p": 5451,
+        "f": 1040
+      },
+      {
+        "n": "群体偏见与群体极化",
+        "u": "https://www.bilibili.com/video/BV1GW411h7NH",
+        "t": "【社会心理学】承认与克服偏见",
+        "p": 15158,
+        "f": 374
+      },
+      {
+        "n": "社会认知",
+        "u": "https://www.bilibili.com/video/BV1L3411e7fE",
+        "t": "10分钟了解社会认知理论SocialCognitive（超详细！！）",
+        "p": 11752,
+        "f": 326
+      },
+      {
+        "n": "说服与影响力",
+        "u": "https://www.bilibili.com/video/BV1k44y1M7xx",
+        "t": "【影响力】爆肝720小时 万字解析 社会心理神作《影响力》！人类的身体中居然也有开关？到底是什么影响力武器能够处处操控人心？",
+        "p": 265615,
+        "f": 12445
+      },
+      {
+        "n": "亲社会行为与攻击",
+        "u": "https://www.bilibili.com/video/BV13W411T7Rh",
+        "t": "【心理学】你是同情、共情、怜悯，还是利他主义？",
+        "p": 67628,
+        "f": 3023
+      }
+    ],
+    "tut": [
+      {
+        "title": "Introduction to Psychology",
+        "platform": "Open Yale Courses",
+        "kind": "公开课",
+        "why": "覆盖知觉、记忆、决策、说服等心理学基础，适合先建全景"
+      },
+      {
+        "title": "Social Psychology",
+        "platform": "Coursera / Wesleyan University",
+        "kind": "公开课",
+        "why": "专门面向社会心理学，适合理解人际和群体行为"
+      },
+      {
+        "title": "《Influence, New and Expanded》",
+        "platform": "书",
+        "kind": "书",
+        "why": "系统介绍互惠、承诺一致、社会认同、权威、喜好和稀缺"
+      }
+    ]
+  },
+  "科学方法论与可证伪思维": {
+    "sub": [
+      {
+        "n": "可证伪性",
+        "u": "https://www.bilibili.com/video/BV1aAmRBdEiQ",
+        "t": "可证伪早就过时，取而代之的是贝叶斯主义，可证伪只是贝叶斯公式 在P(B|A)=0时的一个特例。数学、物理、天文学、医学、经济学、心理学都有哪些致命缺陷？",
+        "p": 323538,
+        "f": 12616
+      },
+      {
+        "n": "相关与因果",
+        "u": "https://www.bilibili.com/video/BV1z4411w7Ki",
+        "t": "常见的逻辑谬误：相关性与因果性的混淆",
+        "p": 7662,
+        "f": 351
+      },
+      {
+        "n": "对照实验与控制变量",
+        "u": "https://www.bilibili.com/video/BV1m5411R7Vg",
+        "t": "【高考生物】实验设计题总没头绪？思路、方法、攻略！",
+        "p": 292771,
+        "f": 9701
+      },
+      {
+        "n": "伪科学识别",
+        "u": "https://www.bilibili.com/video/BV13Q4y1R7Yu",
+        "t": "大问题：科学与伪科学的界限是什么？中医是伪科学吗？",
+        "p": 130672,
+        "f": 1853
+      },
+      {
+        "n": "同行评议与论文质量",
+        "u": "https://www.bilibili.com/video/BV1UM4y1q7Hx",
+        "t": "如何判断你论文的创新度和工作量，能否达到期刊要求？",
+        "p": 58502,
+        "f": 1715
+      },
+      {
+        "n": "证据等级与循证",
+        "u": "https://www.bilibili.com/video/BV1yE411P7DK",
+        "t": "循证医学",
+        "p": 131716,
+        "f": 6247
+      }
+    ],
+    "tut": [
+      {
+        "title": "Calling Bullshit: Data Reasoning in a Digital World",
+        "platform": "University of Washington",
+        "kind": "公开课",
+        "why": "用数据、图表和媒体案例训练识别伪科学与误导性证据"
+      },
+      {
+        "title": "Understanding Research Methods",
+        "platform": "University of London / Coursera",
+        "kind": "公开课",
+        "why": "入门研究问题、研究设计、方法选择和证据解释"
+      },
+      {
+        "title": "《What Is This Thing Called Science?》",
+        "platform": "书",
+        "kind": "书",
+        "why": "科学哲学入门经典，讲观察、归纳、实验和证伪主义"
+      }
+    ]
+  },
+  "逻辑学与谬误识别": {
+    "sub": [
+      {
+        "n": "形式逻辑",
+        "u": "https://www.bilibili.com/video/BV1Dx411B7vt",
+        "t": "【上海交通大学】形式逻辑学 23讲",
+        "p": 80945,
+        "f": 5093
+      },
+      {
+        "n": "命题与谓词逻辑",
+        "u": "https://www.bilibili.com/video/BV14e4y1m7HY",
+        "t": "第二章 命题逻辑概述和复合命题联结词",
+        "p": 56116,
+        "f": 637
+      },
+      {
+        "n": "演绎与归纳",
+        "u": "https://www.bilibili.com/video/BV1Cm4y1B7Q3",
+        "t": "【罗翔】归纳法还是演绎法？聊一聊以偏概全与刻板印象",
+        "p": 527587,
+        "f": 5966
+      },
+      {
+        "n": "非形式谬误",
+        "u": "https://www.bilibili.com/video/BV1EH4y1z7Y1",
+        "t": "形式谬误与非形式谬误",
+        "p": 3979,
+        "f": 14
+      },
+      {
+        "n": "批判性阅读",
+        "u": "https://www.bilibili.com/video/BV1Ba41117sq",
+        "t": "【读书】批评性阅读五步法｜如何读有深度的文字",
+        "p": 20380,
+        "f": 2475
+      },
+      {
+        "n": "论证结构与中文论证拆解",
+        "u": "https://www.bilibili.com/video/BV1B3411n7GC",
+        "t": "杀疯了！论证思路？行文脉络？论证结构？【学过石油的语文老师】",
+        "p": 1250882,
+        "f": 34344
+      }
+    ],
+    "tut": [
+      {
+        "title": "Introduction to Logic",
+        "platform": "Stanford Online / Coursera",
+        "kind": "公开课",
+        "why": "从计算视角入门逻辑表达和推理，适合建立形式化思维"
+      },
+      {
+        "title": "Think Again I: How to Understand Arguments",
+        "platform": "Duke University / Coursera",
+        "kind": "公开课",
+        "why": "专注识别、拆解和补全论证，更贴近日常讨论"
+      },
+      {
+        "title": "《An Illustrated Book of Bad Arguments》",
+        "platform": "书",
+        "kind": "书",
+        "why": "用图文方式介绍常见谬误，快速建立识别词汇表"
+      }
+    ]
+  },
+  "系统思维与复杂性": {
+    "sub": [
+      {
+        "n": "反馈回路",
+        "u": "https://www.bilibili.com/video/BV1NG25BeE2s",
+        "t": "系统动力学：反馈回路、存量与流量、模型",
+        "p": 10040,
+        "f": 497
+      },
+      {
+        "n": "库存与流量",
+        "u": "https://www.bilibili.com/video/BV1NG25BeE2s",
+        "t": "系统动力学：反馈回路、存量与流量、模型",
+        "p": 10041,
+        "f": 497
+      },
+      {
+        "n": "非线性",
+        "u": "https://www.bilibili.com/video/BV1t5RUYFEGT",
+        "t": "林夕洋：非线性动力学和混沌(系列讲座)",
+        "p": 21609,
+        "f": 1673
+      },
+      {
+        "n": "涌现",
+        "u": "https://www.bilibili.com/video/BV1kQYYzaEQH",
+        "t": "【烧脑】为什么简单个体能涌现出惊人智慧？细读《复杂》揭秘自组织与涌现的奥秘",
+        "p": 53093,
+        "f": 4915
+      },
+      {
+        "n": "复杂适应系统",
+        "u": "https://www.bilibili.com/video/BV1bD4y1S7Ly",
+        "t": "复杂适应系统课程",
+        "p": 19665,
+        "f": 1617
+      },
+      {
+        "n": "网络与代理模型",
+        "u": "https://www.bilibili.com/video/BV1co4y1d7xb",
+        "t": "复杂网络分析",
+        "p": 81395,
+        "f": 3942
+      }
+    ],
+    "tut": [
+      {
+        "title": "Introduction to Complexity",
+        "platform": "Santa Fe Institute / Complexity Explorer",
+        "kind": "公开课",
+        "why": "系统入门复杂系统，覆盖混沌、分形、自组织、网络和代理建模"
+      },
+      {
+        "title": "Introduction to System Dynamics",
+        "platform": "MIT OpenCourseWare",
+        "kind": "公开课",
+        "why": "用管理和政策案例学习反馈结构、动态行为和系统动力学建模"
+      },
+      {
+        "title": "《Thinking in Systems》",
+        "platform": "书",
+        "kind": "书",
+        "why": "系统思维经典，重点讲反馈、杠杆点和系统陷阱"
+      }
+    ]
+  },
+  "博弈论": {
+    "sub": [
+      {
+        "n": "占优策略",
+        "u": "https://www.bilibili.com/video/BV165411N7m1",
+        "t": "【博弈论 01】 囚徒困境和严格占优策略 Prisoners' Dilemma and Strictly Dominant Strategy",
+        "p": 20899,
+        "f": 571
+      },
+      {
+        "n": "纳什均衡",
+        "u": "https://www.bilibili.com/video/BV1XQubzkEwe",
+        "t": "【纳什均衡】这个简单的规律，却决定了整个人类的未来！",
+        "p": 2061903,
+        "f": 38897
+      },
+      {
+        "n": "囚徒困境",
+        "u": "https://www.bilibili.com/video/BV13xiXYYEbn",
+        "t": "囚徒困境教会了我们什么？",
+        "p": 160440,
+        "f": 9
+      },
+      {
+        "n": "信息不对称",
+        "u": "https://www.bilibili.com/video/BV1jh411Z7NN",
+        "t": "经济：信息不对称",
+        "p": 21931,
+        "f": 482
+      },
+      {
+        "n": "拍卖与机制设计",
+        "u": "https://www.bilibili.com/video/BV1Gz4y1o7jf",
+        "t": "史上最有用 & 最好理解的诺奖理论 —— 拍卖理论",
+        "p": 57352,
+        "f": 11
+      },
+      {
+        "n": "议价",
+        "u": "https://www.bilibili.com/video/BV1sSFKzVEqh",
+        "t": "【博弈论】讨价还价模型：谈判桌上，真正的力量不是强硬，而是能比对方多等一天。",
+        "p": 11168,
+        "f": 703
+      },
+      {
+        "n": "重复博弈",
+        "u": "https://www.bilibili.com/video/BV1xZ4y1p7qk",
+        "t": "【博弈论】有限重复与无限重复博弈的合作与背叛",
+        "p": 17971,
+        "f": 467
+      }
+    ],
+    "tut": [
+      {
+        "title": "Game Theory",
+        "platform": "Open Yale Courses",
+        "kind": "公开课",
+        "why": "Ben Polak 课程案例生动，适合从囚徒困境和纳什均衡入门"
+      },
+      {
+        "title": "Game Theory",
+        "platform": "Stanford Online / Coursera",
+        "kind": "公开课",
+        "why": "覆盖策略表示、扩展式、贝叶斯博弈、重复博弈和拍卖"
+      },
+      {
+        "title": "《The Art of Strategy》",
+        "platform": "书",
+        "kind": "书",
+        "why": "面向大众的博弈论案例书，适合迁移到商业和生活"
+      }
+    ]
+  },
+  "各行业运行逻辑": {
+    "sub": [
+      {
+        "n": "商业模式",
+        "u": "https://www.bilibili.com/video/BV1fWkuYiEU1",
+        "t": "如何分析公司商业模式",
+        "p": 46707,
+        "f": 4671
+      },
+      {
+        "n": "零售与电商",
+        "u": "https://www.bilibili.com/video/BV1kt4y1y7sk",
+        "t": "【6分钟读懂一个行业】解读直播电商产业链、参与方以及背后的核心商业逻辑",
+        "p": 25432,
+        "f": 754
+      },
+      {
+        "n": "供应链与运营",
+        "u": "https://www.bilibili.com/video/BV1T54y1b7oY",
+        "t": "【职业分享】供应链到底是做什么的？",
+        "p": 78513,
+        "f": 1450
+      },
+      {
+        "n": "平台经济",
+        "u": "https://www.bilibili.com/video/BV19t4y1S78T",
+        "t": "平台经济——资本与金融视角",
+        "p": 8098,
+        "f": 451
+      },
+      {
+        "n": "金融与保险",
+        "u": "https://www.bilibili.com/video/BV1Vwb5zJEWX",
+        "t": "保险学知识点2.5h速通（完结）",
+        "p": 67524,
+        "f": 2473
+      },
+      {
+        "n": "产业链",
+        "u": "https://www.bilibili.com/video/BV1su4y197WH",
+        "t": "行业研究-如何快速理清一个陌生行业的产业链",
+        "p": 83383,
+        "f": 11152
+      }
+    ],
+    "tut": [
+      {
+        "title": "How to Start a Startup",
+        "platform": "Stanford CS183B / Y Combinator / YouTube",
+        "kind": "公开课",
+        "why": "从创业视角理解产品、用户增长、销售、融资、招聘和运营"
+      },
+      {
+        "title": "Supply Chain Management Specialization",
+        "platform": "Rutgers University / Coursera",
+        "kind": "公开课",
+        "why": "用物流、运营、计划和采购解释实体行业背后的成本结构"
+      },
+      {
+        "title": "《Business Model Generation》",
+        "platform": "书",
+        "kind": "书",
+        "why": "用商业模式画布理解客户、价值主张、渠道、收入和成本"
+      }
+    ]
+  },
+  "历史与政治经济": {
+    "sub": [
+      {
+        "n": "经济史",
+        "u": "https://www.bilibili.com/video/BV1rpaHzfEyB",
+        "t": "【经济学】两小时带你入门经济学（史）！（从亚当·斯密到马克思，再到凯恩斯）",
+        "p": 61606,
+        "f": 3324
+      },
+      {
+        "n": "资本主义史",
+        "u": "https://www.bilibili.com/video/BV1mW411J7ED",
+        "t": "《资本的故事》1~3季 全60集 国语中字 720P",
+        "p": 2713798,
+        "f": 160740
+      },
+      {
+        "n": "制度经济学",
+        "u": "https://www.bilibili.com/video/BV1Ap4y1X75x",
+        "t": "新制度经济学-中南财经政法大学",
+        "p": 37301,
+        "f": 2022
+      },
+      {
+        "n": "人口与城市化",
+        "u": "https://www.bilibili.com/video/BV1jG4y1f7tA",
+        "t": "中国城市化，狂奔四十年，在集聚中走向平衡",
+        "p": 1395800,
+        "f": 15840
+      },
+      {
+        "n": "国家形成",
+        "u": "https://www.bilibili.com/video/BV1VT4y177Ni",
+        "t": "【硬核人类史2】国家从何而来？深度解析政治系统的本质",
+        "p": 360583,
+        "f": 10116
+      },
+      {
+        "n": "产业政策",
+        "u": "https://www.bilibili.com/video/BV1dJ411t7zk",
+        "t": "林毅夫 张维迎：产业政策思辨",
+        "p": 123609,
+        "f": 7644
+      }
+    ],
+    "tut": [
+      {
+        "title": "The Ascent of Money",
+        "platform": "PBS",
+        "kind": "纪录片",
+        "why": "用金融史串起货币、债务、银行、债券、保险和房地产"
+      },
+      {
+        "title": "Political Economy and Economic Development",
+        "platform": "MIT OpenCourseWare / MITx",
+        "kind": "公开课",
+        "why": "从腐败、民主、独裁、战争等主题理解制度如何影响发展"
+      },
+      {
+        "title": "《Why Nations Fail》",
+        "platform": "书",
+        "kind": "书",
+        "why": "以制度解释国家贫富差异，是政治经济入门常见入口"
+      }
+    ]
+  },
+  "消费决策与反消费主义": {
+    "sub": [
+      {
+        "n": "预算与记账",
+        "u": "https://www.bilibili.com/video/BV1yA4y1R7kE",
+        "t": "钱去哪了？学会记账让你不再月光 | 三种记账方法总有一款适合你",
+        "p": 538501,
+        "f": 20706
+      },
+      {
+        "n": "比价与保价",
+        "u": "https://www.bilibili.com/video/BV1qj411h7cB",
+        "t": "介绍一下，购物比价和价保监控的软件",
+        "p": 25441,
+        "f": 332
+      },
+      {
+        "n": "冲动消费与欲望管理",
+        "u": "https://www.bilibili.com/video/BV1nE41117DH",
+        "t": "爱乱花钱？这也许真的不是我们的问题呢，哈哈哈嗝【冲动消费】",
+        "p": 238141,
+        "f": 6656
+      },
+      {
+        "n": "广告与营销诱导",
+        "u": "https://www.bilibili.com/video/BV1Et4y1e72E",
+        "t": "消费主义是如何掏空你的腰包？《无节制消费的元凶》| 看电影了没",
+        "p": 106488,
+        "f": 2135
+      },
+      {
+        "n": "极简主义",
+        "u": "https://www.bilibili.com/video/BV1xE41147ak",
+        "t": "【Netflix】极简主义：记录生命中的重要事物 官方双语字幕 Minimalism",
+        "p": 746943,
+        "f": 61411
+      },
+      {
+        "n": "消费主义与消费心理",
+        "u": "https://www.bilibili.com/video/BV1UF4m1w7Nq",
+        "t": "消费主义，是怎么悄悄榨干年轻人的？全网最深度分析，让你学会真正省钱！",
+        "p": 5326476,
+        "f": 153523
+      }
+    ],
+    "tut": [
+      {
+        "title": "The True Cost",
+        "platform": "官方电影页 / YouTube / Netflix",
+        "kind": "纪录片",
+        "why": "通过快时尚产业链讨论低价消费背后的劳动、环境和社会成本"
+      },
+      {
+        "title": "Minimalism: A Documentary About the Important Things",
+        "platform": "Netflix / The Minimalists / YouTube",
+        "kind": "纪录片",
+        "why": "适合作为反消费主义和极简生活的轻量入口"
+      },
+      {
+        "title": "《Your Money or Your Life》",
+        "platform": "书",
+        "kind": "书",
+        "why": "把消费转换为生命时间和自由度，适合重建金钱关系"
+      }
+    ]
+  },
+  "副业与第二收入": {
+    "sub": [
+      {
+        "n": "副业纳税与个体户注册",
+        "u": "https://www.bilibili.com/video/BV1kprPBEEgd",
+        "t": "个体工商户如何申报纳税",
+        "p": 47175,
+        "f": 2071
+      },
+      {
+        "n": "第一单验证与客户获取定价",
+        "u": "https://www.bilibili.com/video/BV1sqQ2BNEVm",
+        "t": 29,
+        "p": 42343,
+        "f": 1571
+      },
+      {
+        "n": "自由职业接单服务",
+        "u": "https://www.bilibili.com/video/BV1ca4y1v7GJ",
+        "t": "剪辑师告诉你：该去哪接剪辑单？高价单怎么接？南门录像厅",
+        "p": 337472,
+        "f": 16922
+      },
+      {
+        "n": "数字产品与知识付费",
+        "u": "https://www.bilibili.com/video/BV1sZBuYzEQw",
+        "t": "知识付费全链路，2025年最in风口拆解，创业，搞钱，必看！",
+        "p": 29196,
+        "f": 1838
+      },
+      {
+        "n": "内容与自媒体运营",
+        "u": "https://www.bilibili.com/video/BV1V6Vm6tEUt",
+        "t": "3个月涨粉10万！普通人怎么做自媒体？",
+        "p": 152835,
+        "f": 5607
+      },
+      {
+        "n": "低成本创业与现金流",
+        "u": "https://www.bilibili.com/video/BV1CN411T7RU",
+        "t": 10,
+        "p": 5632,
+        "f": 197
+      },
+      {
+        "n": "电商与本地服务",
+        "u": "https://www.bilibili.com/video/BV1ZWTKz1ExZ",
+        "t": "强烈推荐！这绝对是B站2025年闲鱼开店教程的天花板教程！14集全是干货，通俗易懂，扇贝听了都鼓掌……",
+        "p": 148414,
+        "f": 4191
+      }
+    ],
+    "tut": [
+      {
+        "title": "Startup School",
+        "platform": "Y Combinator",
+        "kind": "公开课",
+        "why": "免费在线创业课程，理解从想法、用户、产品到增长的基本功"
+      },
+      {
+        "title": "《The $100 Startup》",
+        "platform": "书",
+        "kind": "书",
+        "why": "聚焦低成本微型创业，适合作为副业商业化案例库"
+      },
+      {
+        "title": "《Side Hustle: From Idea to Income in 27 Days》",
+        "platform": "书",
+        "kind": "书",
+        "why": "按天拆解从副业想法筛选到上线验证的流程"
+      }
+    ]
+  },
+  "学习科学 / 如何学习": {
+    "sub": [
+      {
+        "n": "间隔重复与主动回忆",
+        "u": "https://www.bilibili.com/video/BV1f741147QB",
+        "t": "【中英字幕|Ali Abdaal】高效学习法之间隔式重复学习法",
+        "p": 80651,
+        "f": 7541
+      },
+      {
+        "n": "错题本与复习系统",
+        "u": "https://www.bilibili.com/video/BV1GE411Q7Ew",
+        "t": "高考686分学长手把手教你做错题本-附PDF电子版-错题本经验分享-高考错题本教程【WhynotTV】【Neal】",
+        "p": 4990111,
+        "f": 474231
+      },
+      {
+        "n": "费曼学习法与输出式学习",
+        "u": "https://www.bilibili.com/video/BV1KL4y1s7jr",
+        "t": "费曼学习法----看似最笨的办法常常是最有效的（附实例）",
+        "p": 1945402,
+        "f": 122351
+      },
+      {
+        "n": "知识组块化与卡片法",
+        "u": "https://www.bilibili.com/video/BV19t421E7bb",
+        "t": "【渐构】组块化是记忆力神器？那，代价是什么呢？揭秘必知前提与潜在局限",
+        "p": 103578,
+        "f": 5116
+      },
+      {
+        "n": "刻意练习",
+        "u": "https://www.bilibili.com/video/BV1w8411J7nn",
+        "t": "刻意练习2.0：改变命运的最好方式",
+        "p": 673386,
+        "f": 55953
+      },
+      {
+        "n": "元认知与学习方法",
+        "u": "https://www.bilibili.com/video/BV1KB4y1c7gg",
+        "t": "不喜欢学习，真的等于不会学习吗？元学习，一个改变你一生的能力 | 2021年B站最硬核的知识视频【思维论14】",
+        "p": 666033,
+        "f": 45062
+      },
+      {
+        "n": "拖延与学习动机",
+        "u": "https://www.bilibili.com/video/BV1Hn4y1o7bh",
+        "t": "【拖延脑科学】“拖”是成事第一关，搞懂原理才好使！",
+        "p": 1726469,
+        "f": 15
+      }
+    ],
+    "tut": [
+      {
+        "title": "Learning How to Learn",
+        "platform": "Coursera / UC San Diego",
+        "kind": "公开课",
+        "why": "覆盖组块、拖延、记忆和错觉式学习，是学习策略入门首选"
+      },
+      {
+        "title": "《Make It Stick》",
+        "platform": "书",
+        "kind": "书",
+        "why": "把主动回忆、交错练习、间隔复习等实证方法讲得清楚"
+      },
+      {
+        "title": "《How Learning Works》",
+        "platform": "书",
+        "kind": "书",
+        "why": "用七条研究型原则解释学习发生机制"
+      }
+    ]
+  },
+  "提问 · 检索 · AI 使用素养": {
+    "sub": [
+      {
+        "n": "提示词与上下文设计",
+        "u": "https://www.bilibili.com/video/BV1ib421E7Sy",
+        "t": "我用了3年的AI提示词万能公式，5分钟解决70%提示词问题~",
+        "p": 256461,
+        "f": 15348
+      },
+      {
+        "n": "关键词与搜索语法",
+        "u": "https://www.bilibili.com/video/BV1w54y1q7uf",
+        "t": "【分享】你真的会用搜索引擎吗？转发！99%的人都不知道的高效搜索引擎使用技巧",
+        "p": 268381,
+        "f": 18169
+      },
+      {
+        "n": "问题界定与批判性提问",
+        "u": "https://www.bilibili.com/video/BV13e411T7XD",
+        "t": "精读好书《学会提问》｜批判性思维入门经典，真正授人以渔的智慧之书",
+        "p": 92102,
+        "f": 6522
+      },
+      {
+        "n": "来源评估与交叉验证",
+        "u": "https://www.bilibili.com/video/BV1zyP1z9Ent",
+        "t": "【科普向】如何使用AI做事实核查？有什么需要注意的误区？",
+        "p": 5048,
+        "f": 55
+      },
+      {
+        "n": "AI 幻觉与事实核查",
+        "u": "https://www.bilibili.com/video/BV1CmK8zWEHY",
+        "t": "【漫士】AI为什么会出现幻觉？该如何解决?",
+        "p": 445439,
+        "f": 6162
+      },
+      {
+        "n": "隐私保护与信息脱敏",
+        "u": "https://www.bilibili.com/video/BV1eTUYBqEAS",
+        "t": "通过一个手机号，拿到你的一切信息！（网络安全|信息安全）",
+        "p": 221332,
+        "f": 9194
+      }
+    ],
+    "tut": [
+      {
+        "title": "Power Searching with Google",
+        "platform": "Google",
+        "kind": "公开课",
+        "why": "训练关键词、搜索运算符和事实查找，适合补检索基本功"
+      },
+      {
+        "title": "Generative AI for Everyone",
+        "platform": "Coursera / DeepLearning.AI",
+        "kind": "公开课",
+        "why": "非技术背景也能理解生成式 AI 能做什么、不能做什么"
+      },
+      {
+        "title": "OpenAI Prompt engineering guide",
+        "platform": "OpenAI 官方文档",
+        "kind": "文章",
+        "why": "学习如何给模型清晰指令、提供上下文和控制输出格式"
+      }
+    ]
+  },
+  "AI Agent 编排与自治工作流": {
+    "sub": [
+      {
+        "n": "工具调用与函数调用",
+        "u": "https://www.bilibili.com/video/BV1hUpGeMExA",
+        "t": "LLM如何“自主”调用工具？揭秘Function Calling真相！",
+        "p": 15887,
+        "f": 685
+      },
+      {
+        "n": "计划-执行-反思模式",
+        "u": "https://www.bilibili.com/video/BV13R9aB5EeL",
+        "t": "从零实现自己的agent第四期: agent的任务规划",
+        "p": 5273,
+        "f": 222
+      },
+      {
+        "n": "多智能体协作",
+        "u": "https://www.bilibili.com/video/BV19LdqBAErd",
+        "t": "多智能体系统怎么搭？claude给出了5种模式和选择标准",
+        "p": 13185,
+        "f": 17
+      },
+      {
+        "n": "工作流编排",
+        "u": "https://www.bilibili.com/video/BV19D9eB9Etg",
+        "t": "Agent 编排的四种模式：到底谁说了算？| 7 分钟看懂工业级多 Agent 系统",
+        "p": 9029,
+        "f": 725
+      },
+      {
+        "n": "记忆与上下文工程",
+        "u": "https://www.bilibili.com/video/BV1w3GNzeEHb",
+        "t": "上下文工程：优化 Agent 效能的关键技术",
+        "p": 25483,
+        "f": 1760
+      },
+      {
+        "n": "评估与安全边界",
+        "u": "https://www.bilibili.com/video/BV1DCrVBREA8",
+        "t": "没有评估的 Agent，注定不可规模化：Anthropic《Demystifying evals for AI agents》①",
+        "p": 16759,
+        "f": 1306
+      }
+    ],
+    "tut": [
+      {
+        "title": "Hugging Face Agents Course",
+        "platform": "Hugging Face Learn",
+        "kind": "公开课",
+        "why": "从 Agent 基本概念讲到构建与部署，适合第一次系统接触 Agent"
+      },
+      {
+        "title": "Foundation: Introduction to LangGraph - Python",
+        "platform": "LangChain Academy",
+        "kind": "公开课",
+        "why": "用图、状态、节点和边理解可控的 agentic workflow"
+      },
+      {
+        "title": "Multi AI Agent Systems with crewAI",
+        "platform": "DeepLearning.AI",
+        "kind": "公开课",
+        "why": "通过角色、目标和任务分解理解多 Agent 协作"
+      },
+      {
+        "title": "Agents SDK",
+        "platform": "OpenAI 官方文档",
+        "kind": "文章",
+        "why": "了解工具、handoff、guardrails、sessions 等 Agent 组件"
+      }
+    ]
+  },
+  "信息与统计素养": {
+    "sub": [
+      {
+        "n": "描述统计与数据可视化",
+        "u": "https://www.bilibili.com/video/BV1B7411v73M",
+        "t": "【统计学速成课】Statistics - [45集全/中英双语] - Crash Course Statistics",
+        "p": 684818,
+        "f": 66495
+      },
+      {
+        "n": "概率与不确定性",
+        "u": "https://www.bilibili.com/video/BV1TQwCzsEKP",
+        "t": "【概率统计】条件概率！保姆级讲解！",
+        "p": 2923976,
+        "f": 74294
+      },
+      {
+        "n": "抽样方法与抽样偏差",
+        "u": "https://www.bilibili.com/video/BV1Pv411p7P9",
+        "t": "《统计学原理》第七章第二节 抽样误差",
+        "p": 60131,
+        "f": 27.58
+      },
+      {
+        "n": "相关回归与因果推断",
+        "u": "https://www.bilibili.com/video/BV16741127wC",
+        "t": "90分钟回归分析全讲",
+        "p": 261270,
+        "f": 10589
+      },
+      {
+        "n": "实验设计与A/B测试",
+        "u": "https://www.bilibili.com/video/BV1Va411s7ky",
+        "t": "【AB测试干货】原理、案例及面试指南(上篇)",
+        "p": 31452,
+        "f": 1365
+      },
+      {
+        "n": "误导性图表与统计谎言",
+        "u": "https://www.bilibili.com/video/BV1Je4y1d73M",
+        "t": "利用统计来撒谎是多么容易啊",
+        "p": 30217,
+        "f": 1725
+      }
+    ],
+    "tut": [
+      {
+        "title": "Statistics and Probability",
+        "platform": "Khan Academy",
+        "kind": "视频",
+        "why": "免费、分单元、练习多，适合零基础补统计和概率"
+      },
+      {
+        "title": "Calling Bullshit: Data Reasoning in a Digital World",
+        "platform": "University of Washington",
+        "kind": "公开课",
+        "why": "专门训练识别数据、图表、统计话术中的误导"
+      },
+      {
+        "title": "《How to Lie with Statistics》",
+        "platform": "书",
+        "kind": "书",
+        "why": "短小经典，用大量例子解释统计数字如何被包装和误用"
+      }
+    ]
+  },
+  "信息饮食与高信噪比信息源治理": {
+    "sub": [
+      {
+        "n": "信息源分层与高质量信息获取",
+        "u": "https://www.bilibili.com/video/BV1KH4y1K7T1",
+        "t": "久旱逢甘霖系列10--如何获取高质量信息&优质信息源及对日常信息分类",
+        "p": 42956,
+        "f": 8387
+      },
+      {
+        "n": "事实核查与横向阅读",
+        "u": "https://www.bilibili.com/video/BV1zyP1z9Ent",
+        "t": "【科普向】如何使用AI做事实核查？有什么需要注意的误区？",
+        "p": 5048,
+        "f": 55
+      },
+      {
+        "n": "媒体偏见与批判性阅读",
+        "u": "https://www.bilibili.com/video/BV1xC4113749",
+        "t": "不追求真实，只煽动情绪，互联网内容如何破坏人的思维？【猫一杯事件解读】",
+        "p": 197221,
+        "f": 3932
+      },
+      {
+        "n": "算法推荐与注意力管理",
+        "u": "https://www.bilibili.com/video/BV1xn4y1X7W6",
+        "t": "注意力总不集中？让效能翻倍的“注意力管理”｜5步“心流”重塑你的专注力",
+        "p": 47589,
+        "f": 2852
+      },
+      {
+        "n": "RSS订阅与信息聚合流程",
+        "u": "https://www.bilibili.com/video/BV1oB421z7vk",
+        "t": "用RSS统一订阅公众号微博小红书，治好了我的信息焦虑",
+        "p": 72919,
+        "f": 1463
+      },
+      {
+        "n": "错误信息与谣言辨识辟谣",
+        "u": "https://www.bilibili.com/video/BV1xkpWzHEvD",
+        "t": "于朦胧去世为何谣言多？信息不对称背景下的网络乱象",
+        "p": 1330223,
+        "f": 803
+      },
+      {
+        "n": "信息断食与数字极简",
+        "u": "https://www.bilibili.com/video/BV1s541127Ht",
+        "t": "我停用了智能手机一年。",
+        "p": 106524,
+        "f": 2184
+      }
+    ],
+    "tut": [
+      {
+        "title": "Making Sense of the News: News Literacy Lessons for Digital Citizens",
+        "platform": "Coursera / HKU / SUNY",
+        "kind": "公开课",
+        "why": "训练判断可靠信息、识别新闻与其他信息的差异"
+      },
+      {
+        "title": "Infodemic Management 101",
+        "platform": "OpenWHO / WHO",
+        "kind": "公开课",
+        "why": "理解错误信息传播、公共健康信息治理和信息疫情管理"
+      },
+      {
+        "title": "《The Information Diet》",
+        "platform": "书",
+        "kind": "书",
+        "why": "把信息摄入类比为饮食，帮助建立信息源选择边界"
+      }
+    ]
+  },
+  "写作与结构化表达": {
+    "sub": [
+      {
+        "n": "中文标点与标题摘要",
+        "u": "https://www.bilibili.com/video/BV1eP4y197PE",
+        "t": "教你秒学会标点符号的用法及常考点～再也不会傻傻分不清楚！",
+        "p": 248212,
+        "f": 9636
+      },
+      {
+        "n": "金字塔结构",
+        "u": "https://www.bilibili.com/video/BV1Zi4y137xM",
+        "t": "十分钟干货！耐心看完《金字塔原理》，彻底提升逻辑思维",
+        "p": 277324,
+        "f": 10097
+      },
+      {
+        "n": "段落句子清晰度",
+        "u": "https://www.bilibili.com/video/BV1hL4y1j71v",
+        "t": "word教程6：段落格式设置方法技巧，设置好行间距、对齐方式，能让文档更美观",
+        "p": 77649,
+        "f": -1
+      },
+      {
+        "n": "公文与政策方案写作",
+        "u": "https://www.bilibili.com/video/BV1dTtxzDEo2",
+        "t": "【全72课】零基础公文写作，成为体制内写材料的高手",
+        "p": 152664,
+        "f": 11575
+      },
+      {
+        "n": "技术文档",
+        "u": "https://www.bilibili.com/video/BV17s4y1J7rG",
+        "t": "阿里工程师带你学技术文档该怎么写",
+        "p": 35614,
+        "f": 1565
+      },
+      {
+        "n": "学术论文与复盘报告",
+        "u": "https://www.bilibili.com/video/BV1LnUHYSES8",
+        "t": "论文到底怎么写？一个视频速通！选题、文献、结构、写作、降重、PPT全方位讲解！",
+        "p": 942015,
+        "f": 86991
+      }
+    ],
+    "tut": [
+      {
+        "title": "Writing in the Sciences",
+        "platform": "Coursera / Stanford Online",
+        "kind": "公开课",
+        "why": "前半部分对清晰表达、删改和读者意识很通用"
+      },
+      {
+        "title": "Technical Writing Courses",
+        "platform": "Google for Developers",
+        "kind": "公开课",
+        "why": "适合工程、产品和知识库文档写作，强调清晰和结构"
+      },
+      {
+        "title": "《The Minto Pyramid Principle》",
+        "platform": "书",
+        "kind": "书",
+        "why": "商业写作和结构化表达经典，训练先结论后论据"
+      }
+    ]
+  },
+  "决策科学": {
+    "sub": [
+      {
+        "n": "沉没成本与机会成本",
+        "u": "https://www.bilibili.com/video/BV1zF411x7E3",
+        "t": "2-3、边际成本、沉没成本：做出最佳决定的底层逻辑",
+        "p": 60379,
+        "f": 2947
+      },
+      {
+        "n": "判断偏差与启发式",
+        "u": "https://www.bilibili.com/video/BV1C7411s7GA",
+        "t": "13 种认知偏差，揭示人类思维自带的缺陷【阿健】",
+        "p": 848180,
+        "f": 62643
+      },
+      {
+        "n": "概率风险与贝叶斯",
+        "u": "https://www.bilibili.com/video/BV1a4411B7B4",
+        "t": "「一个模型」教你搞定贝叶斯和全概率公式",
+        "p": 1130683,
+        "f": 51080
+      },
+      {
+        "n": "行为经济学",
+        "u": "https://www.bilibili.com/video/BV1Ha4y1i7zJ",
+        "t": "【字幕】行为经济学-北京大学光华管理学院",
+        "p": 325768,
+        "f": 43532
+      },
+      {
+        "n": "多目标决策与权衡",
+        "u": "https://www.bilibili.com/video/BV1P5411W7Az",
+        "t": "统计预测和决策-第17章 多目标决策法",
+        "p": 18652,
+        "f": 589
+      },
+      {
+        "n": "群体决策与噪声",
+        "u": "https://www.bilibili.com/video/BV1Tr4y1H7cd",
+        "t": "互联网如何强化你的观念？群体思维如何导致糟糕决策？",
+        "p": 315254,
+        "f": 14534
+      },
+      {
+        "n": "复盘方法",
+        "u": "https://www.bilibili.com/video/BV1gG411j7e9",
+        "t": "看完学不会复盘你打我！保姆级复盘教学",
+        "p": 123684,
+        "f": 7355
+      }
+    ],
+    "tut": [
+      {
+        "title": "Effective Problem-Solving and Decision-Making",
+        "platform": "Coursera / UC Irvine",
+        "kind": "公开课",
+        "why": "从识别问题、生成方案到应用决策风格，实用且入门"
+      },
+      {
+        "title": "A Beginner's Guide to Irrational Behavior",
+        "platform": "Dan Ariely / Duke Coursera archive",
+        "kind": "公开课",
+        "why": "用行为经济学实验理解人为什么系统性做错决定"
+      },
+      {
+        "title": "《Smart Choices》",
+        "platform": "书",
+        "kind": "书",
+        "why": "提供 PrOACT 等可操作框架，适合个人和工作决策"
+      }
+    ]
+  },
+  "时间与精力管理": {
+    "sub": [
+      {
+        "n": "优先级与取舍",
+        "u": "https://www.bilibili.com/video/BV1XA41187VA",
+        "t": "5.33",
+        "p": 18873,
+        "f": 350
+      },
+      {
+        "n": "日程任务与回顾",
+        "u": "https://www.bilibili.com/video/BV1eT4y157M8",
+        "t": "6 分钟重新认识番茄工作法。",
+        "p": 469415,
+        "f": 26043
+      },
+      {
+        "n": "深度工作",
+        "u": "https://www.bilibili.com/video/BV1iPVgzqE4e",
+        "t": "看1次手机=浪费23分钟？《深度工作》作者揭露你不知道的效率杀手",
+        "p": 426408,
+        "f": 28537
+      },
+      {
+        "n": "习惯与拖延",
+        "u": "https://www.bilibili.com/video/BV1dU4y1j7HR",
+        "t": "10.13",
+        "p": 3350265,
+        "f": 207492
+      },
+      {
+        "n": "睡眠运动与恢复",
+        "u": "https://www.bilibili.com/video/BV1Dm4y1N778",
+        "t": "7.0",
+        "p": 4900344,
+        "f": 318122
+      }
+    ],
+    "tut": [
+      {
+        "title": "Work Smarter, Not Harder",
+        "platform": "Coursera / UC Irvine",
+        "kind": "公开课",
+        "why": "从目标、优先级、排程和授权开始建立时间管理框架"
+      },
+      {
+        "title": "《Getting Things Done》",
+        "platform": "书",
+        "kind": "书",
+        "why": "提供捕捉、澄清、组织、回顾和执行的一套任务系统"
+      },
+      {
+        "title": "《Deep Work》",
+        "platform": "书",
+        "kind": "书",
+        "why": "解释注意力保护、深度工作时段和分心环境下的产出"
+      }
+    ]
+  },
+  "项目管理（生活与工作）": {
+    "sub": [
+      {
+        "n": "家庭项目",
+        "u": "https://www.bilibili.com/video/BV1Af4y1E7eK",
+        "t": "每天面对5个项目，如何用Notion做时间管理?分享我的Notion模板|项目管理|自我管理|个人知识体系",
+        "p": 36500,
+        "f": 1426
+      },
+      {
+        "n": "沟通与干系人",
+        "u": "https://www.bilibili.com/video/BV1oyxWenEFm",
+        "t": "【干系人管理】驭人术的五大法宝，道、法、术、器、势",
+        "p": 18400,
+        "f": 3443
+      },
+      {
+        "n": "敏捷与看板",
+        "u": "https://www.bilibili.com/video/BV1Rx41197i8",
+        "t": "大厂程序员是如何做敏捷开发的?大公司程序员编程开发流程|大公司是如何快速响应用户需求并实现产品的持续交付",
+        "p": 59600,
+        "f": 1551
+      },
+      {
+        "n": "WBS拆解与里程碑",
+        "u": "https://www.bilibili.com/video/BV14e411x7W1",
+        "t": "项目管理中的WBS",
+        "p": 58033,
+        "f": 1750
+      },
+      {
+        "n": "风险与变更管理",
+        "u": "https://www.bilibili.com/video/BV1jR4y1f72z",
+        "t": "项目风险管理",
+        "p": 10897,
+        "f": 584
+      },
+      {
+        "n": "复盘与质量",
+        "u": "https://www.bilibili.com/video/BV1Va411k7zh",
+        "t": "4步高效项目复盘--不会复盘，项目白干",
+        "p": 11380,
+        "f": 409
+      }
+    ],
+    "tut": [
+      {
+        "title": "Google Project Management Professional Certificate",
+        "platform": "Coursera / Google",
+        "kind": "公开课",
+        "why": "面向入门项目经理，覆盖传统项目、敏捷、风险和沟通"
+      },
+      {
+        "title": "The Agile Coach",
+        "platform": "Atlassian",
+        "kind": "文章",
+        "why": "用短文解释敏捷、Scrum、看板和冲刺等概念"
+      },
+      {
+        "title": "《Making Things Happen》",
+        "platform": "书",
+        "kind": "书",
+        "why": "案例感强，适合理解真实项目中的计划、沟通和决策"
+      }
+    ]
+  },
+  "情绪与认知科学（Fi）": {
+    "sub": [
+      {
+        "n": "情绪命名",
+        "u": "https://www.bilibili.com/video/BV1yY411y7XR",
+        "t": "命名解套的原理是什么？为什么命名后情绪/想法还在？｜情绪日记答疑精选 8",
+        "p": 1339,
+        "f": 39
+      },
+      {
+        "n": "认知偏差与判断",
+        "u": "https://www.bilibili.com/video/BV1C7411s7GA",
+        "t": "13 种认知偏差，揭示人类思维自带的缺陷【阿健】",
+        "p": 848180,
+        "f": 62643
+      },
+      {
+        "n": "注意与记忆",
+        "u": "https://www.bilibili.com/video/BV1xn4y1X7W6",
+        "t": "注意力总不集中？让效能翻倍的“注意力管理”｜5步“心流”重塑你的专注力",
+        "p": 47589,
+        "f": 2852
+      },
+      {
+        "n": "情绪调节",
+        "u": "https://www.bilibili.com/video/BV1ti421C7m8",
+        "t": "【TED科普】7个技巧，让你的情绪保持健康！",
+        "p": 278748,
+        "f": 16046
+      },
+      {
+        "n": "压力反应",
+        "u": "https://www.bilibili.com/video/BV1oG4y1R7Mp",
+        "t": "【花小烙】为什么压力一大，你的身体就很容易出现各种问题？",
+        "p": 3224101,
+        "f": 26442
+      },
+      {
+        "n": "心理咨询路径",
+        "u": "https://www.bilibili.com/video/BV14u411B7o2",
+        "t": "你以为的心理咨询vs实际上的心理咨询。原来心理咨询是这样做的……",
+        "p": 192285,
+        "f": 1717
+      }
+    ],
+    "tut": [
+      {
+        "title": "The Science of Well-Being",
+        "platform": "Coursera / Yale",
+        "kind": "公开课",
+        "why": "从幸福感、习惯和认知误区切入，连接情绪体验和认知模式"
+      },
+      {
+        "title": "《How Emotions Are Made》",
+        "platform": "书",
+        "kind": "书",
+        "why": "通俗介绍建构情绪理论，理解情绪不是简单自动反应"
+      },
+      {
+        "title": "《Emotional Intelligence》",
+        "platform": "书",
+        "kind": "书",
+        "why": "帮助建立情绪识别、自我调节和关系中的情绪语言"
+      }
+    ]
+  },
+  "社交与沟通": {
+    "sub": [
+      {
+        "n": "主动倾听",
+        "u": "https://www.bilibili.com/video/BV1Vd4y1Y7uT",
+        "t": "心理健康老师10分钟试讲 学会倾听。心理健康教资面试，心理健康考编面试",
+        "p": 97734,
+        "f": 2282
+      },
+      {
+        "n": "清晰表达",
+        "u": "https://www.bilibili.com/video/BV1xb4y1i7FQ",
+        "t": "每天10分钟快速提升表达能力 简单初学版",
+        "p": 710886,
+        "f": 296
+      },
+      {
+        "n": "非暴力沟通",
+        "u": "https://www.bilibili.com/video/BV19K411H7cF",
+        "t": "语言暴力无处不在 读懂《非暴力沟通》改善人际关系 实现有效沟通 | David书籍分享",
+        "p": 361674,
+        "f": 22931
+      },
+      {
+        "n": "向上管理",
+        "u": "https://www.bilibili.com/video/BV1jr4y1z772",
+        "t": "20分钟解读书籍《向上管理的艺术》：真正聪明的员工,都懂得“向上管理”",
+        "p": 29868,
+        "f": 1497
+      },
+      {
+        "n": "职场沟通",
+        "u": "https://www.bilibili.com/video/BV1Zb411o7cS",
+        "t": "【职场沟通】如何与同事沟通？如何和上级沟通？如何和下级沟通？",
+        "p": 17177,
+        "f": 1998
+      },
+      {
+        "n": "关系维护",
+        "u": "https://www.bilibili.com/video/BV17e411P7Ws",
+        "t": "精读好书《沟通的艺术》① | 最系统的人际沟通课（修订第15版本）",
+        "p": 54380,
+        "f": 3507
+      }
+    ],
+    "tut": [
+      {
+        "title": "Improving Communication Skills",
+        "platform": "Coursera / University of Pennsylvania",
+        "kind": "公开课",
+        "why": "以工作和目标达成为场景，覆盖表达、影响和沟通策略"
+      },
+      {
+        "title": "《Nonviolent Communication: A Language of Life》",
+        "platform": "书",
+        "kind": "书",
+        "why": "提供观察、感受、需要、请求的基础框架"
+      },
+      {
+        "title": "TED: How to speak so that people want to listen",
+        "platform": "TED / YouTube",
+        "kind": "视频",
+        "why": "用短演讲展示清晰表达、声音和听众注意力的关键点"
+      }
+    ]
+  },
+  "中国特色人际关系（职场/人情/面子）": {
+    "sub": [
+      {
+        "n": "红包礼数",
+        "u": "https://www.bilibili.com/video/BV1TptPeQEvz",
+        "t": "给上级送礼！10分钟职场送礼全攻略！",
+        "p": 45638,
+        "f": 9.9
+      },
+      {
+        "n": "酒局文化与边界",
+        "u": "https://www.bilibili.com/video/BV1eN4y187pU",
+        "t": "本视频解决参加酒局的全部问题【博士方法论09】",
+        "p": 561920,
+        "f": 14.5
+      },
+      {
+        "n": "人情往来与人情债",
+        "u": "https://www.bilibili.com/video/BV1m2421L7gs",
+        "t": "中国特色人情社会的由来 过年送礼-拉关系社会学",
+        "p": 25453,
+        "f": 565
+      },
+      {
+        "n": "面子与声望",
+        "u": "https://www.bilibili.com/video/BV1a9CpBoELQ",
+        "t": "中国式面子文化：一场全民参与的尊严交易",
+        "p": 113948,
+        "f": 27.9
+      },
+      {
+        "n": "职场关系与向上汇报",
+        "u": "https://www.bilibili.com/video/BV1qY4y1K7rT",
+        "t": "向上汇报如何说领导想听的话",
+        "p": 8107,
+        "f": 54.8
+      },
+      {
+        "n": "差序格局与社会规则",
+        "u": "https://www.bilibili.com/video/BV1zV411d7sc",
+        "t": "第108讲《乡土中国》 差序格局",
+        "p": 72834,
+        "f": 1653
+      }
+    ],
+    "tut": [
+      {
+        "title": "社会学概论",
+        "platform": "中国大学MOOC / 西安交通大学",
+        "kind": "公开课",
+        "why": "用社会学基本概念理解群体、组织、分层和日常社会运行"
+      },
+      {
+        "title": "《乡土中国》",
+        "platform": "书",
+        "kind": "书",
+        "why": "差序格局、熟人社会、礼治等概念是理解中国式关系的入口"
+      },
+      {
+        "title": "《人情、面子与权力的再生产》",
+        "platform": "书",
+        "kind": "书",
+        "why": "专门讨论人情、面子、关系与权力的连接"
+      }
+    ]
+  },
+  "两性关系与婚恋博弈（当下语境）": {
+    "sub": [
+      {
+        "n": "现代恋爱观",
+        "u": "https://www.bilibili.com/video/BV1zN41187Uu",
+        "t": "很正的恋爱观",
+        "p": 2941240,
+        "f": 211370
+      },
+      {
+        "n": "择偶标准与匹配",
+        "u": "https://www.bilibili.com/video/BV1Zw4m1D7z5",
+        "t": "如何为自己制定一套真正有用的「择偶标准」？",
+        "p": 82219,
+        "f": 2112
+      },
+      {
+        "n": "长期关系经营",
+        "u": "https://www.bilibili.com/video/BV1yK4y1M7Nh",
+        "t": "No.12《亲密关系》必修课，谈恋爱前后你需要学会的技能（已完结）",
+        "p": 666143,
+        "f": 47395
+      },
+      {
+        "n": "婚前财产与协议",
+        "u": "https://www.bilibili.com/video/BV1MF411K7q3",
+        "t": "我要如何保护好我的婚前财产？",
+        "p": 253409,
+        "f": 6783
+      },
+      {
+        "n": "彩礼嫁妆与婚姻法",
+        "u": "https://www.bilibili.com/video/BV12dNHekEr5",
+        "t": "结婚前必须想清楚的彩礼嫁妆问题｜年轻人为何反感谈彩礼？",
+        "p": 980239,
+        "f": 29649
+      },
+      {
+        "n": "算法内容去毒与性别对立",
+        "u": "https://www.bilibili.com/video/BV1jR4y197kC",
+        "t": "推送算法是如何支配人的自由意志？信息茧房 来吧最甜蜜的死亡",
+        "p": 70229,
+        "f": 1
+      }
+    ],
+    "tut": [
+      {
+        "title": "Sex, Explained",
+        "platform": "Netflix",
+        "kind": "纪录片",
+        "why": "用短纪录片介绍吸引、避孕、生育等现代亲密议题"
+      },
+      {
+        "title": "《Modern Romance: An Investigation》",
+        "platform": "书",
+        "kind": "书",
+        "why": "结合社会学研究和当代约会经验，理解技术平台如何改变恋爱选择"
+      },
+      {
+        "title": "The Psychology of Love",
+        "platform": "TED-Ed / YouTube",
+        "kind": "视频",
+        "why": "用动画快速建立爱情心理和关系机制的基础语言"
+      }
+    ]
+  },
+  "成人依恋类型与关系重构": {
+    "sub": [
+      {
+        "n": "依恋理论入门",
+        "u": "https://www.bilibili.com/video/BV1LG4y1A7JZ",
+        "t": "依恋理论：童年如何影响人的一生?",
+        "p": 68858,
+        "f": 3320
+      },
+      {
+        "n": "依恋类型自测",
+        "u": "https://www.bilibili.com/video/BV1c34y1H7fC",
+        "t": "【互动视频】12道题！测出你的依恋类型（含解释分析）",
+        "p": 714137,
+        "f": 14195
+      },
+      {
+        "n": "安全型依恋",
+        "u": "https://www.bilibili.com/video/BV1tA4m1L75D",
+        "t": "人类恋爱天花板：安全型恋人的6个特点",
+        "p": 261413,
+        "f": 9054
+      },
+      {
+        "n": "焦虑型依恋",
+        "u": "https://www.bilibili.com/video/BV1WD4y1u7Rd",
+        "t": "5:06",
+        "p": 11956,
+        "f": 4
+      },
+      {
+        "n": "回避型依恋",
+        "u": "https://www.bilibili.com/video/BV1yYGhz5EQs",
+        "t": "为什么回避型依恋的人从不会主动联系他人及如何走出回避型依恋",
+        "p": 1641474,
+        "f": 72783
+      },
+      {
+        "n": "关系修复与重建",
+        "u": "https://www.bilibili.com/video/BV1yK4y1M7Nh",
+        "t": "No.12《亲密关系》必修课，谈恋爱前后你需要学会的技能",
+        "p": 666143,
+        "f": 47395
+      }
+    ],
+    "tut": [
+      {
+        "title": "What Is Your Attachment Style?",
+        "platform": "YouTube / The School of Life",
+        "kind": "视频",
+        "why": "用短视频快速建立依恋类型的基本语言"
+      },
+      {
+        "title": "《Attached》",
+        "platform": "书",
+        "kind": "书",
+        "why": "专门面向成人亲密关系中的依恋模式，案例化、易读"
+      },
+      {
+        "title": "Attachment Theory in Action",
+        "platform": "YouTube / The School of Life",
+        "kind": "视频",
+        "why": "用生活情境解释依恋如何影响关系反应"
+      }
+    ]
+  },
+  "力量训练 / 一项纯身体技能": {
+    "sub": [
+      {
+        "n": "健身房礼仪",
+        "u": "https://www.bilibili.com/video/BV1nM786cExU",
+        "t": "全网最详细新手第一次去健身房全流程（超详细",
+        "p": 22257,
+        "f": 1424
+      },
+      {
+        "n": "体测指标",
+        "u": "https://www.bilibili.com/video/BV1Et421372A",
+        "t": "别太信，体测仪上的体脂率",
+        "p": 36351,
+        "f": 88
+      },
+      {
+        "n": "动作模式",
+        "u": "https://www.bilibili.com/video/BV1fe411N7SL",
+        "t": "基本概念｜运动平面",
+        "p": 2925,
+        "f": 1028
+      },
+      {
+        "n": "深蹲硬拉卧推",
+        "u": "https://www.bilibili.com/video/BV1So4y1k7Qg",
+        "t": "健身小白必学动作｜深蹲·硬拉·卧推·划船·推肩的细节要点透析（附操作）",
+        "p": 52353,
+        "f": 2958
+      },
+      {
+        "n": "动作安全与伤病预防",
+        "u": "https://www.bilibili.com/video/BV1xz4y1C7AC",
+        "t": "【卓叔】新手训练扫盲08：训练安全手册",
+        "p": 185943,
+        "f": 2775
+      },
+      {
+        "n": "渐进超负荷",
+        "u": "https://www.bilibili.com/video/BV1sh411e7i6",
+        "t": "为什么健身很久没变化/新手怎么进步/专门性/渐进/超负荷/思路分享",
+        "p": 347739,
+        "f": 13672
+      },
+      {
+        "n": "恢复与营养",
+        "u": "https://www.bilibili.com/video/BV1yX4y1q7LP",
+        "t": "💪🏻B站版《健身新手的饮食完全手册》™",
+        "p": 2573678,
+        "f": 230464
+      }
+    ],
+    "tut": [
+      {
+        "title": "Learning to Squat | The Starting Strength Method",
+        "platform": "Starting Strength / YouTube",
+        "kind": "视频",
+        "why": "动作教学明确，适合从杠铃深蹲等基础模式开始"
+      },
+      {
+        "title": "《Starting Strength: Basic Barbell Training》",
+        "platform": "书",
+        "kind": "书",
+        "why": "系统讲解基础杠铃动作和初学者训练逻辑"
+      },
+      {
+        "title": "How to Deadlift",
+        "platform": "Starting Strength / YouTube",
+        "kind": "视频",
+        "why": "演示硬拉动作设置、发力路径和常见错误"
+      }
+    ]
+  },
+  "谈判与说服": {
+    "sub": [
+      {
+        "n": "情绪控制",
+        "u": "https://www.bilibili.com/video/BV1Tz421Y72X",
+        "t": "“愤怒”的本质｜4个小技巧帮你控制愤怒情绪 | 改善易怒体质的方法",
+        "p": 58533,
+        "f": 2365
+      },
+      {
+        "n": "薪资谈判",
+        "u": "https://www.bilibili.com/video/BV1Kt4y1x7Yi",
+        "t": "【10分钟教你谈薪】！最全薪酬谈判事项（附话术模板）",
+        "p": 124939,
+        "f": 8455
+      },
+      {
+        "n": "说服心理学",
+        "u": "https://www.bilibili.com/video/BV1Fw4m1C74j",
+        "t": "拒绝无效沟通，如何高效说服他人？如何通过心理学效应忽悠别人？pua与反pua2",
+        "p": 79667,
+        "f": 6749
+      },
+      {
+        "n": "锚定与让步",
+        "u": "https://www.bilibili.com/video/BV1Qs411n7eR",
+        "t": "锚定效应:你为什么总是被商家套路？",
+        "p": 164734,
+        "f": 4551
+      },
+      {
+        "n": "BATNA与谈判底线",
+        "u": "https://www.bilibili.com/video/BV15BNRzCEtM",
+        "t": "20分钟读懂《谈判力》，揭秘让你赢得更多的终极策略",
+        "p": 6830,
+        "f": 327
+      },
+      {
+        "n": "商务谈判综合",
+        "u": "https://www.bilibili.com/video/BV1sy4y127JL",
+        "t": "FBI首席谈判专家-Chris Voss 教谈判大师课（中英字幕）",
+        "p": 1070102,
+        "f": 156346
+      }
+    ],
+    "tut": [
+      {
+        "title": "Successful Negotiation: Essential Strategies and Skills",
+        "platform": "Coursera / University of Michigan",
+        "kind": "公开课",
+        "why": "覆盖准备、谈判、签约、执行评估四步，结构清晰"
+      },
+      {
+        "title": "《Getting to Yes》",
+        "platform": "书",
+        "kind": "书",
+        "why": "经典利益式谈判入门，适合建立原则谈判框架"
+      },
+      {
+        "title": "The Art of Negotiation",
+        "platform": "TED / YouTube",
+        "kind": "视频",
+        "why": "用演讲形式快速理解谈判中的准备、倾听和交换"
+      }
+    ]
+  },
+  "亲密关系认知": {
+    "sub": [
+      {
+        "n": "关系信念",
+        "u": "https://www.bilibili.com/video/BV1xR4y1M7SW",
+        "t": "糟粕滚粗，短视频洗脑下的当代青年爱情观为何走歪？",
+        "p": 4020350,
+        "f": 6.78
+      },
+      {
+        "n": "情绪连接",
+        "u": "https://www.bilibili.com/video/BV1hB4y1X7ej",
+        "t": "恋爱中缺乏安全感怎么办？听听李松蔚老师的建议",
+        "p": 272392,
+        "f": 3784
+      },
+      {
+        "n": "冲突修复",
+        "u": "https://www.bilibili.com/video/BV14h411v74i",
+        "t": "毁掉恋爱的不是吵架，是你不会吵架！进来学！！！",
+        "p": 721260,
+        "f": 27561
+      },
+      {
+        "n": "伴侣筛选",
+        "u": "https://www.bilibili.com/video/BV1sh23B9EU5",
+        "t": "如何筛选出“对的人”？为什么我劝你对自己宽容一点？",
+        "p": 196924,
+        "f": 4733
+      },
+      {
+        "n": "关系满意度",
+        "u": "https://www.bilibili.com/video/BV1yK4y1M7Nh",
+        "t": "No.12《亲密关系》必修课，谈恋爱前后你需要学会的技能（已完结）",
+        "p": 666143,
+        "f": 47395
+      },
+      {
+        "n": "长期承诺",
+        "u": "https://www.bilibili.com/video/BV1GZ421q7WH",
+        "t": "爱情中激情亲密承诺背后科学,多巴胺催产素如何让人坠入爱河",
+        "p": 142876,
+        "f": 5694
+      }
+    ],
+    "tut": [
+      {
+        "title": "Making Marriage Work | Dr. John Gottman",
+        "platform": "YouTube / The Gottman Institute",
+        "kind": "视频",
+        "why": "研究者本人讲解幸福关系的发现和工具"
+      },
+      {
+        "title": "《The Relationship Cure》",
+        "platform": "书",
+        "kind": "书",
+        "why": "围绕情感连接和回应方式，把亲密互动拆成可练习动作"
+      },
+      {
+        "title": "The Science of Love",
+        "platform": "The Gottman Institute / YouTube",
+        "kind": "视频",
+        "why": "用研究结果解释长期关系中的连接、冲突和修复"
+      }
+    ]
+  },
+  "审美创作输出": {
+    "sub": [
+      {
+        "n": "构图",
+        "u": "https://www.bilibili.com/video/BV1Q64y1T7ox",
+        "t": "6分钟让你学会构图，拍照萌新变摄影大师！（手机摄影和相机摄影构图技巧）",
+        "p": 6579519,
+        "f": 643056
+      },
+      {
+        "n": "色彩基础",
+        "u": "https://www.bilibili.com/video/BV1pu411f7Nm",
+        "t": "【色彩基础原理】基础色彩入门&进阶教程合集！艺术之源！",
+        "p": 86688,
+        "f": 6737
+      },
+      {
+        "n": "字体与版式",
+        "u": "https://www.bilibili.com/video/BV1oPHgeiEgb",
+        "t": "【排版60集】零基础教你快速掌握版式基本功 ，纯文字也能制作出好看的海报，轻松学会版式设计！",
+        "p": 487969,
+        "f": 32716
+      },
+      {
+        "n": "作品反馈",
+        "u": "https://www.bilibili.com/video/BV16E41147Hg",
+        "t": "【平面设计/设计经验】如何去解读和分析一个设计作品！原来可以这样~个人思路理解技巧大公开",
+        "p": 112684,
+        "f": 8593
+      },
+      {
+        "n": "视觉叙事",
+        "u": "https://www.bilibili.com/video/BV1NbrsYxEGj",
+        "t": "叙事节奏、视角、距离，十分钟用人话讲清楚叙事学！",
+        "p": 132722,
+        "f": 15999
+      },
+      {
+        "n": "作品集",
+        "u": "https://www.bilibili.com/video/BV1SY4y137Z6",
+        "t": "如何打造作品集高级感？一小时教你几十种排版小技巧！",
+        "p": 144882,
+        "f": 9596
+      },
+      {
+        "n": "中文审美史",
+        "u": "https://www.bilibili.com/video/BV1Qm4y1S7DU",
+        "t": "山东大学 - 中国审美文化史（国家级精品课）",
+        "p": 21143,
+        "f": 2621
+      }
+    ],
+    "tut": [
+      {
+        "title": "Fundamentals of Graphic Design",
+        "platform": "Coursera / CalArts",
+        "kind": "公开课",
+        "why": "从图像、字体、形状、色彩和构图入门"
+      },
+      {
+        "title": "Ways of Seeing",
+        "platform": "BBC / Internet Archive",
+        "kind": "纪录片",
+        "why": "经典视觉文化入门，帮助理解观看方式和审美判断"
+      },
+      {
+        "title": "《The Design of Everyday Things》",
+        "platform": "书",
+        "kind": "书",
+        "why": "从日常物品理解可用性、反馈和设计判断"
+      }
+    ]
+  },
+  "烹饪": {
+    "sub": [
+      {
+        "n": "调味平衡",
+        "u": "https://www.bilibili.com/video/BV1jR4y1Z76q",
+        "t": "一次学会热菜常用六种汁，你已经是一个高手了",
+        "p": 1307893,
+        "f": 375
+      },
+      {
+        "n": "刀工与备菜",
+        "u": "https://www.bilibili.com/video/BV1M4411M7vb",
+        "t": "带你从零到入门的基础刀功切菜教学（磨刀+切菜基础）（新手向）",
+        "p": 102042,
+        "f": 4117
+      },
+      {
+        "n": "火候",
+        "u": "https://www.bilibili.com/video/BV1R3odYwEbG",
+        "t": "烹饪基础问题：大火与小火。都是100度了，那不都一样吗？",
+        "p": 1757725,
+        "f": 46009
+      },
+      {
+        "n": "食材科学",
+        "u": "https://www.bilibili.com/video/BV1nh411m7DX",
+        "t": "浅谈食物选购——小小采购家（食品安全）",
+        "p": 12950,
+        "f": 1930
+      },
+      {
+        "n": "厨房流程",
+        "u": "https://www.bilibili.com/video/BV1Hh411S7Ys",
+        "t": "【曼食慢语】我懒得做饭还想每天带便当，UP：你还有啥要求一次说完",
+        "p": 1152222,
+        "f": 47889
+      },
+      {
+        "n": "食品安全",
+        "u": "https://www.bilibili.com/video/BV1Eg4y1k7i5",
+        "t": "年度十大食品谣言！",
+        "p": 16324620,
+        "f": 122242
+      }
+    ],
+    "tut": [
+      {
+        "title": "Science & Cooking: From Haute Cuisine to Soft Matter Science",
+        "platform": "edX / HarvardX",
+        "kind": "公开课",
+        "why": "用烹饪理解化学、物理和工程原理"
+      },
+      {
+        "title": "《Salt, Fat, Acid, Heat》",
+        "platform": "书",
+        "kind": "书",
+        "why": "把好吃拆成盐、脂、酸、热四个变量，适合初学者建立判断力"
+      },
+      {
+        "title": "Basics with Babish",
+        "platform": "YouTube",
+        "kind": "视频",
+        "why": "以基础菜和厨房技巧为主，适合跟做建立手感"
+      }
+    ]
+  },
+  "冥想 / 正念": {
+    "sub": [
+      {
+        "n": "呼吸觉察",
+        "u": "https://www.bilibili.com/video/BV1F44y1D7CL",
+        "t": "冥想入门｜10min正念呼吸冥想｜放松大脑稳定情绪",
+        "p": 396097,
+        "f": 14202
+      },
+      {
+        "n": "身体扫描",
+        "u": "https://www.bilibili.com/video/BV1Nf4y1a7YM",
+        "t": "想象自己在森林里 做一次身体扫描正念冥想练习丨睡眠放松解压专注",
+        "p": 568005,
+        "f": 12394
+      },
+      {
+        "n": "睡前放松",
+        "u": "https://www.bilibili.com/video/BV1ra411r7RE",
+        "t": "【20分钟助眠冥想】睡前必备！正念潜意识输入 积极自我肯定 深度疗愈安眠 | Yue Yoga",
+        "p": 1587933,
+        "f": 33002
+      },
+      {
+        "n": "慈心练习",
+        "u": "https://www.bilibili.com/video/BV1q3411b7Ac",
+        "t": "【缓解抑郁】减少自我批判，提升正能量，值得每天打卡的慈心冥想",
+        "p": 67875,
+        "f": 1887
+      },
+      {
+        "n": "压力与焦虑缓解",
+        "u": "https://www.bilibili.com/video/BV1AG4y167xD",
+        "t": "10min正念冥想，停止内耗，舒缓焦虑，找回轻松心态",
+        "p": 3169221,
+        "f": 93415
+      },
+      {
+        "n": "MBSR正念减压",
+        "u": "https://www.bilibili.com/video/BV19y4y1V7RU",
+        "t": "正念减压疗法创始人-乔.卡巴金 教正念冥想大师课（中英字幕）",
+        "p": 726228,
+        "f": 64840
+      }
+    ],
+    "tut": [
+      {
+        "title": "De-Mystifying Mindfulness",
+        "platform": "Coursera / Leiden University",
+        "kind": "公开课",
+        "why": "既讲正念练习，也讲常见误解、心理治疗和社会语境"
+      },
+      {
+        "title": "Mindfulness-Based Stress Reduction Guided Practices",
+        "platform": "UC San Diego Center for Mindfulness",
+        "kind": "视频",
+        "why": "提供可跟练的正念与减压练习"
+      },
+      {
+        "title": "《Full Catastrophe Living》",
+        "platform": "书",
+        "kind": "书",
+        "why": "MBSR 经典文本，理解正念如何用于压力、疼痛和日常生活"
+      }
+    ]
+  },
+  "基础工程 / 家居与万物运转": {
+    "sub": [
+      {
+        "n": "简单机械",
+        "u": "https://www.bilibili.com/video/BV15w411F78K",
+        "t": "人类如何利用一些简单的工具和一点聪明才智来操纵物理定律？杠杆、滑轮、齿轮的工作原理！",
+        "p": 22818,
+        "f": 963
+      },
+      {
+        "n": "五金工具使用",
+        "u": "https://www.bilibili.com/video/BV1Ht421A7RU",
+        "t": "【电动工具全解】工科生的电动手办！15种常用电动工具的超全解析，入门看这一个就够了！",
+        "p": 242019,
+        "f": 16073
+      },
+      {
+        "n": "家居维修",
+        "u": "https://www.bilibili.com/video/BV1jT4y1s7NR",
+        "t": "家庭维修工具箱大公开？基础工具小白扫盲，男孩变硬汉！帮你提升家庭地位！",
+        "p": 125877,
+        "f": 4057
+      },
+      {
+        "n": "水电安全",
+        "u": "https://www.bilibili.com/video/BV15G411X7YW",
+        "t": "从零开始学会自装修：水电篇22分钟每一帧都是干货|学完水电不踩坑",
+        "p": 501986,
+        "f": 45654
+      },
+      {
+        "n": "家电维护",
+        "u": "https://www.bilibili.com/video/BV1t5ymBsEk9",
+        "t": "一篇说清所有家电清洗",
+        "p": 595273,
+        "f": 63376
+      },
+      {
+        "n": "墙体与承重",
+        "u": "https://www.bilibili.com/video/BV1FK4y1w7RQ",
+        "t": "不是承重墙就能拆吗？虽不是承重墙，却是剪力墙",
+        "p": 9401,
+        "f": 473
+      },
+      {
+        "n": "报修沟通",
+        "u": "https://www.bilibili.com/video/BV1f54y1t76n",
+        "t": "《去修手机要这样说话，才不被坑》",
+        "p": 219157,
+        "f": 3580
+      }
+    ],
+    "tut": [
+      {
+        "title": "Ask This Old House",
+        "platform": "PBS",
+        "kind": "视频",
+        "why": "围绕真实家居维修问题演示水电、木工、暖通等场景"
+      },
+      {
+        "title": "《The Way Things Work Now》",
+        "platform": "书",
+        "kind": "书",
+        "why": "用图解方式解释机器和日常技术原理"
+      },
+      {
+        "title": "This Old House: Home Improvement Videos",
+        "platform": "YouTube",
+        "kind": "视频",
+        "why": "大量实操维修和工具使用演示，适合建立家居工程直觉"
+      }
+    ]
+  },
+  "亲子沟通与情绪教养（非暴力养育）": {
+    "sub": [
+      {
+        "n": "情绪命名",
+        "u": "https://www.bilibili.com/video/BV1cz4y1E7zF",
+        "t": "如何识别和命名你的情绪？",
+        "p": 13442,
+        "f": 1299
+      },
+      {
+        "n": "共情倾听",
+        "u": "https://www.bilibili.com/video/BV1qs4y1r7uD",
+        "t": "李松蔚——极简亲子沟通：这么说，孩子才爱听【完结】",
+        "p": 77007,
+        "f": 5596
+      },
+      {
+        "n": "正向强化",
+        "u": "https://www.bilibili.com/video/BV1GT411o7pG",
+        "t": "【哈弗父母情商课】从焦虑到从容，不吼不叫养出好孩子——张璐",
+        "p": 167338,
+        "f": 14676
+      },
+      {
+        "n": "规则与边界",
+        "u": "https://www.bilibili.com/video/BV1bW4y1p7Tp",
+        "t": "【李玫瑾】如何给孩子立规矩？听话的孩子就好么？",
+        "p": 378159,
+        "f": 4700
+      },
+      {
+        "n": "冲突修复",
+        "u": "https://www.bilibili.com/video/BV16mWqzEEuq",
+        "t": "【家庭沟通】一开口就吵架？科学破解死循环！",
+        "p": 508964,
+        "f": 28214
+      },
+      {
+        "n": "屏幕时间",
+        "u": "https://www.bilibili.com/video/BV1PszrBREU4",
+        "t": "孩子为何沉迷手机",
+        "p": 3142117,
+        "f": 237271
+      }
+    ],
+    "tut": [
+      {
+        "title": "Everyday Parenting: The ABCs of Child Rearing",
+        "platform": "Coursera / Yale",
+        "kind": "公开课",
+        "why": "提供行为改变和日常亲子互动工具，有示范视频"
+      },
+      {
+        "title": "《How to Talk So Kids Will Listen & Listen So Kids Will Talk》",
+        "platform": "书",
+        "kind": "书",
+        "why": "以接纳感受、替代命令、合作表达为核心"
+      },
+      {
+        "title": "The Whole-Brain Child",
+        "platform": "书",
+        "kind": "书",
+        "why": "把儿童大脑发展和情绪教养连接起来，适合家长入门"
+      }
+    ]
+  }
+};
+const TIER_VAL={高:3,中:2,轻:1};
+
+/* ========= 状态 ========= */
+let state={
+  types:[], tiers:[],
+  minRet:0, maxCost:99, minRoi:0,
+  q:"", sort:"score", dir:"desc", flat:false, expanded:new Set()
+};
+const roiOf=d=>+(d.ret/d.cost).toFixed(1);
+const scoreOf=d=>+((d.ret+roiOf(d)+d.freq*0.5)/1.25).toFixed(1); // 归一到 0-10
+const valOf=(d,k)=> k==="roi"?roiOf(d) : k==="score"?scoreOf(d) : k==="tier"?TIER_VAL[d.tier] : d[k];
+
+/* ========= 渲染：速览（独立于筛选，始终全量） ========= */
+function renderPicks(){
+  const byRoi=[...D].sort((a,b)=>roiOf(b)-roiOf(a) || b.ret-a.ret).slice(0,11);
+  document.getElementById("top-roi").innerHTML=byRoi.map(d=>
+    `<li><span class="r">${roiOf(d)}</span> ${d.name} <small>· ${TYPE[d.type].n.split(" ")[0]}</small></li>`).join("");
+  const pricey=[...D].filter(d=>d.ret>=4 && d.cost>=3)
+    .sort((a,b)=>b.ret-a.ret || roiOf(b)-roiOf(a));
+  document.getElementById("top-ret").innerHTML=pricey.map(d=>
+    `<li>${d.name} <small>· 收益${d.ret} / 成本${d.cost} · 性价比${roiOf(d)}</small></li>`).join("");
+}
+
+/* ========= 渲染：表格 ========= */
+function stars(v,color){
+  const r=Math.max(0,Math.min(5,Math.round(v*2)/2));
+  const pct=(r/5*100).toFixed(1);
+  return `<span class="stars" title="${r}★"><span class="stars-empty">★★★★★</span><span class="stars-full" style="width:${pct}%;color:${color}">★★★★★</span></span>`;
+}
+function metricCell(d,k){
+  const v=valOf(d,k);
+  let starV=v, color="var(--roi)", numCls="mnum";
+  if(k==="cost") color="var(--mid)";
+  else if(k==="freq") color="var(--B)";
+  if(k==="roi"||k==="score") numCls="mnum roi";
+  if(k==="score") starV=v/2;
+  return `<td class="center"><span class="mcell">${stars(starV,color)}<span class="${numCls}">${v}</span></span></td>`;
+}
+function escapeHTML(v){
+  return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+const REF_URLS={
+  "Personal Finance|Khan Academy":"https://www.khanacademy.org/college-careers-more/personal-finance",
+  "Financial Markets|Yale Online / Coursera":"https://www.coursera.org/learn/financial-markets-global",
+  "《小狗钱钱》|书":"https://zh.wikipedia.org/wiki/%E5%B0%8F%E7%8B%97%E9%92%B1%E9%92%B1",
+  "Understanding Medical Research: Your Facebook Friend is Wrong|Yale Online / Coursera":"https://www.coursera.org/learn/medical-research",
+  "Crash Course Anatomy & Physiology|YouTube":"https://www.youtube.com/playlist?list=PL8dPuuaLjXtOAKed_MxxWBNaPno5h3Zs8",
+  "MedlinePlus 健康主题|U.S. National Library of Medicine":"https://medlineplus.gov/healthtopics.html",
+  "Sleep: Neurobiology, Medicine, and Society|University of Michigan / Coursera":"https://www.coursera.org/learn/sleep",
+  "The Truth About: Sleep|BBC":"https://www.bbc.co.uk/programmes/b08q8p13",
+  "CDC Sleep and Sleep Disorders|CDC":"https://www.cdc.gov/sleep/",
+  "Mayo Clinic Minute: Ergonomic recommendations for working from home|Mayo Clinic / YouTube":"https://www.mayoclinic.org/healthy-lifestyle/adult-health/in-depth/office-ergonomics/art-20046169",
+  "Computer Workstations eTool|OSHA":"https://www.osha.gov/etools/computer-workstations",
+  "Elements of Ergonomics Programs|NIOSH / CDC":"https://www.cdc.gov/niosh/docs/97-117/default.html",
+  "劳动与社会保障法|中国大学MOOC / 西北大学":"https://www.gov.cn/flfg/2007-06/29/content_669394.htm",
+  "劳动与社会保障法：原理及案例|国家高等教育智慧教育平台":"https://higher.smartedu.cn/",
+  "劳动人事争议仲裁办案规则|司法部":"https://www.gov.cn/gongbao/content/2017/content_5219163.htm",
+  "救在身边·红十字应急救护服务平台|中国红十字会总会训练中心":"https://www.crcrx.org.cn/",
+  "Heartsaver First Aid CPR AED|American Heart Association":"https://cpr.heart.org/en/cpr-courses-and-kits/heartsaver/heartsaver-first-aid-cpr-aed-training",
+  "Until Help Arrives|FEMA / Ready.gov":"https://community.fema.gov/PreparednessCommunity/s/until-help-arrives",
+  "Insurance|Khan Academy Financial Literacy":"https://www.khanacademy.org/college-careers-more/personal-finance/insurance",
+  "Consumer Insurance Search|NAIC":"https://content.naic.org/consumer-insurance-search",
+  "《保险这样买就对了》|书":"https://book.douban.com/subject/36113855/",
+  "Housing|Khan Academy":"https://www.khanacademy.org/college-careers-more/personal-finance/housing",
+  "Buying a house|Consumer Financial Protection Bureau":"https://www.consumerfinance.gov/owning-a-home/",
+  "Your home loan toolkit|CFPB":"https://www.consumerfinance.gov/owning-a-home/loan-toolkit/",
+  "Cybersecurity: Crash Course Computer Science #31|Crash Course / YouTube":"https://thecrashcourse.com/courses/cybersecurity-crash-course-computer-science-31/",
+  "Secure Our World|CISA":"https://www.cisa.gov/secure-our-world",
+  "防范电信网络诈骗宣传手册|公安部刑侦局 / 国家反诈中心":"https://www.mps.gov.cn/",
+  "法律讲堂（生活版）|CCTV / 央视网":"https://tv.cctv.com/lm/fljtshb/",
+  "民法学|中国大学MOOC / 天津大学":"https://www.gov.cn/xinwen/2020-06/01/content_5516649.htm",
+  "中华人民共和国民法典|司法部":"https://www.gov.cn/xinwen/2020-06/01/content_5516649.htm",
+  "税务讲堂：个人所得税综合所得年度汇算视频解读|国家税务总局":"https://www.chinatax.gov.cn/chinatax/n810341/n810760/common_list_ssjh.html",
+  "国家社会保险公共服务平台|人力资源和社会保障部":"https://si.12333.gov.cn/",
+  "个人所得税专项附加扣除操作办法|国家税务总局":"https://www.chinatax.gov.cn/chinatax/n363/c5189360/content.html",
+  "知危险会避险交通安全主题课|央视频 / 公安部交管局":"https://gab.122.gov.cn/m/index/",
+  "Road Safety|NHTSA":"https://www.nhtsa.gov/road-safety",
+  "The Highway Code|GOV.UK":"https://www.gov.uk/guidance/the-highway-code",
+  "Food for Thought - How to Use the Nutrition Facts Label|FDA / YouTube":"https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label",
+  "How to Understand and Use the Nutrition Facts Label|FDA":"https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label",
+  "中国居民膳食指南（2022）|中国营养学会":"https://dg.cnsoc.org/",
+  "How to Brush Your Teeth|American Dental Association / YouTube":"https://www.mouthhealthy.org/all-topics-a-z/brushing-your-teeth",
+  "Brushing Your Teeth / Flossing|ADA MouthHealthy":"https://www.mouthhealthy.org/all-topics-a-z/brushing-your-teeth",
+  "Periodontal Gum Disease|NIDCR / NIH":"https://www.nidcr.nih.gov/health-info/gum-disease",
+  "Vital Signs: Understanding What the Body Is Telling Us|University of Pennsylvania / Coursera":"https://www.coursera.org/learn/vital-signs",
+  "Medical Tests|MedlinePlus":"https://medlineplus.gov/lab-tests/",
+  "Common Medical Tests|Merck Manual Consumer Version":"https://www.merckmanuals.com/home/special-subjects/common-medical-tests/common-medical-tests",
+  "Fire Safety - Have Two Ways Out|FEMA / YouTube":"https://www.ready.gov/home-fires",
+  "Carbon Monoxide Poisoning Basics|CDC":"https://www.cdc.gov/carbon-monoxide/about/",
+  "Electrical Home Fire Safety|NFPA":"https://www.nfpa.org/education-and-research/home-fire-safety/electrical",
+  "中央广播电视总台3·15晚会|央视频":"https://tv.cctv.com/lm/315wnh/",
+  "全国12315平台|国家市场监督管理总局体系":"https://www.12315.cn/",
+  "中华人民共和国消费者权益保护法|国家市场监督管理总局":"https://www.gov.cn/jrzg/2013-10/26/content_2515601.htm",
+  "Interest and debt|Khan Academy Personal Finance":"https://www.khanacademy.org/college-careers-more/personal-finance/pf-interest-and-debt",
+  "Credit reports and scores|CFPB":"https://www.consumerfinance.gov/consumer-tools/credit-reports-and-scores/",
+  "Understanding FICO Scores|myFICO":"https://www.myfico.com/credit-education/credit-scores",
+  "医保支付小课堂|国家医疗保障局":"https://www.nhsa.gov.cn/col/col207/index.html",
+  "医保政策问答手册|国家医疗保障局":"https://www.nhsa.gov.cn/col/col205/index.html",
+  "跨省异地就医如何直接报销？|国家医疗保障局":"https://fuwu.nhsa.gov.cn/nationalHallSt/#/search/medicalRecord",
+  "婚姻家庭继承法|中国大学MOOC / 北京化工大学":"https://www.gov.cn/xinwen/2020-06/01/content_5516649.htm",
+  "中华人民共和国民法典 第六编 继承|最高人民检察院 / 新华网":"https://www.gov.cn/xinwen/2020-06/01/content_5516649.htm",
+  "公证指南：如何订立一份有效遗嘱？|北京市公证协会":"https://www.bjnotary.org.cn/",
+  "Stanford Introduction to Food and Health|Stanford Online / Coursera":"https://www.coursera.org/learn/food-and-health",
+  "About Healthy Weight and Growth|CDC":"https://www.cdc.gov/healthy-weight-growth/",
+  "Body Weight Planner|NIDDK / NIH":"https://www.niddk.nih.gov/bwp",
+  "Principles of Microeconomics|MIT OpenCourseWare":"https://ocw.mit.edu/courses/14-01-principles-of-microeconomics-fall-2018/",
+  "Principles of Economics: Microeconomics|Marginal Revolution University":"https://mru.org/principles-economics-microeconomics",
+  "《Nudge: The Final Edition》|书":"https://www.penguinrandomhouse.com/books/691163/nudge-by-richard-h-thaler-and-cass-r-sunstein/",
+  "Statistics 110: Probability|Harvard University / YouTube / edX":"https://projects.iq.harvard.edu/stat110/home",
+  "Statistics and Probability|Khan Academy":"https://www.khanacademy.org/math/statistics-probability",
+  "《Thinking in Bets》|书":"https://www.penguinrandomhouse.com/books/552878/thinking-in-bets-by-annie-duke/",
+  "Introduction to Psychology|Open Yale Courses":"https://oyc.yale.edu/psychology/psyc-110",
+  "Social Psychology|Coursera / Wesleyan University":"https://www.coursera.org/learn/social-psychology",
+  "《Influence, New and Expanded》|书":"https://www.harpercollins.com/products/influence-new-and-expanded-robert-b-cialdini",
+  "Calling Bullshit: Data Reasoning in a Digital World|University of Washington":"https://www.callingbullshit.org/",
+  "Understanding Research Methods|University of London / Coursera":"https://www.coursera.org/learn/research-methods",
+  "《What Is This Thing Called Science?》|书":"https://hackettpublishing.com/what-is-this-thing-called-science",
+  "Introduction to Logic|Stanford Online / Coursera":"https://www.coursera.org/learn/logic-introduction",
+  "Think Again I: How to Understand Arguments|Duke University / Coursera":"https://www.coursera.org/learn/understanding-arguments",
+  "《An Illustrated Book of Bad Arguments》|书":"https://bookofbadarguments.com/",
+  "Introduction to Complexity|Santa Fe Institute / Complexity Explorer":"https://www.complexityexplorer.org/courses/97-introduction-to-complexity",
+  "Introduction to System Dynamics|MIT OpenCourseWare":"https://ocw.mit.edu/courses/15-871-introduction-to-system-dynamics-fall-2013/",
+  "《Thinking in Systems》|书":"https://www.chelseagreen.com/product/thinking-in-systems/",
+  "Game Theory|Open Yale Courses":"https://oyc.yale.edu/economics/econ-159",
+  "Game Theory|Stanford Online / Coursera":"https://www.coursera.org/learn/game-theory-1",
+  "《The Art of Strategy》|书":"https://wwnorton.com/books/The-Art-of-Strategy/",
+  "How to Start a Startup|Stanford CS183B / Y Combinator / YouTube":"https://startupclass.samaltman.com/",
+  "Supply Chain Management Specialization|Rutgers University / Coursera":"https://www.coursera.org/specializations/supply-chain-management",
+  "《Business Model Generation》|书":"https://www.strategyzer.com/library/business-model-generation",
+  "The Ascent of Money|PBS":"https://www.pbs.org/show/ascent-of-money/",
+  "Political Economy and Economic Development|MIT OpenCourseWare / MITx":"https://ocw.mit.edu/courses/14-773-political-economy-and-economic-development-spring-2020/",
+  "《Why Nations Fail》|书":"https://www.penguinrandomhouse.com/books/306316/why-nations-fail-by-daron-acemoglu-and-james-a-robinson/",
+  "The True Cost|官方电影页 / YouTube / Netflix":"https://truecostmovie.com/",
+  "Minimalism: A Documentary About the Important Things|Netflix / The Minimalists / YouTube":"https://www.theminimalists.com/documentaries/",
+  "《Your Money or Your Life》|书":"https://www.penguinrandomhouse.com/books/227490/your-money-or-your-life-by-vicki-robin-and-joe-dominguez/",
+  "Startup School|Y Combinator":"https://www.startupschool.org/",
+  "《The $100 Startup》|书":"https://100startup.com/",
+  "《Side Hustle: From Idea to Income in 27 Days》|书":"https://sidehustleschool.com/side-hustle-book/",
+  "Learning How to Learn|Coursera / UC San Diego":"https://www.coursera.org/learn/learning-how-to-learn",
+  "《Make It Stick》|书":"https://www.hup.harvard.edu/books/9780674729018",
+  "《How Learning Works》|书":"https://www.wiley.com/en-us/How+Learning+Works%3A+Eight+Research+Based+Principles+for+Smart+Teaching%2C+2nd+Edition-p-9781119861693",
+  "Power Searching with Google|Google":"https://coursebuilder.withgoogle.com/sample/course",
+  "Generative AI for Everyone|Coursera / DeepLearning.AI":"https://www.coursera.org/learn/generative-ai-for-everyone",
+  "OpenAI Prompt engineering guide|OpenAI 官方文档":"https://platform.openai.com/docs/guides/prompt-engineering",
+  "Hugging Face Agents Course|Hugging Face Learn":"https://huggingface.co/learn/agents-course",
+  "Foundation: Introduction to LangGraph - Python|LangChain Academy":"https://academy.langchain.com/courses/intro-to-langgraph",
+  "Multi AI Agent Systems with crewAI|DeepLearning.AI":"https://www.deeplearning.ai/short-courses/multi-ai-agent-systems-with-crewai/",
+  "Agents SDK|OpenAI 官方文档":"https://openai.github.io/openai-agents-python/",
+  "《How to Lie with Statistics》|书":"https://wwnorton.com/books/How-to-Lie-with-Statistics/",
+  "Making Sense of the News: News Literacy Lessons for Digital Citizens|Coursera / HKU / SUNY":"https://www.coursera.org/learn/news-literacy",
+  "Infodemic Management 101|OpenWHO / WHO":"https://openwho.org/courses/infodemic-management-101",
+  "《The Information Diet》|书":"https://www.oreilly.com/library/view/the-information-diet/9781449322178/",
+  "Writing in the Sciences|Coursera / Stanford Online":"https://www.coursera.org/learn/sciwrite",
+  "Technical Writing Courses|Google for Developers":"https://developers.google.com/tech-writing",
+  "《The Minto Pyramid Principle》|书":"https://www.pearson.com/en-us/subject-catalog/p/the-minto-pyramid-principle/P200000003377",
+  "Effective Problem-Solving and Decision-Making|Coursera / UC Irvine":"https://www.coursera.org/learn/problem-solving",
+  "A Beginner's Guide to Irrational Behavior|Dan Ariely / Duke Coursera archive":"https://www.youtube.com/playlist?list=PLD7E21BF91F3F9683",
+  "《Smart Choices》|书":"https://store.hbr.org/product/smart-choices-a-practical-guide-to-making-better-decisions/1706",
+  "Work Smarter, Not Harder|Coursera / UC Irvine":"https://www.coursera.org/learn/work-smarter-not-harder",
+  "《Getting Things Done》|书":"https://gettingthingsdone.com/product/getting-things-done-the-book/",
+  "《Deep Work》|书":"https://calnewport.com/deep-work/",
+  "Google Project Management Professional Certificate|Coursera / Google":"https://www.coursera.org/professional-certificates/google-project-management",
+  "The Agile Coach|Atlassian":"https://www.atlassian.com/agile",
+  "《Making Things Happen》|书":"https://www.oreilly.com/library/view/making-things-happen/9780596517717/",
+  "The Science of Well-Being|Coursera / Yale":"https://www.coursera.org/learn/the-science-of-well-being",
+  "《How Emotions Are Made》|书":"https://lisafeldmanbarrett.com/books/how-emotions-are-made/",
+  "《Emotional Intelligence》|书":"https://www.penguinrandomhouse.com/books/69182/emotional-intelligence-by-daniel-goleman/",
+  "Improving Communication Skills|Coursera / University of Pennsylvania":"https://www.coursera.org/learn/wharton-communication-skills",
+  "《Nonviolent Communication: A Language of Life》|书":"https://www.nonviolentcommunication.com/product/nonviolent-communication-a-language-of-life-3rd-edition/",
+  "TED: How to speak so that people want to listen|TED / YouTube":"https://www.ted.com/talks/julian_treasure_how_to_speak_so_that_people_want_to_listen",
+  "社会学概论|中国大学MOOC / 西安交通大学":"https://www.icourse163.org/",
+  "《乡土中国》|书":"https://book.douban.com/subject/1200840/",
+  "《人情、面子与权力的再生产》|书":"https://book.douban.com/subject/25725855/",
+  "Sex, Explained|Netflix":"https://www.netflix.com/title/81160763",
+  "《Modern Romance: An Investigation》|书":"https://www.penguinrandomhouse.com/books/317386/modern-romance-by-aziz-ansari/",
+  "The Psychology of Love|TED-Ed / YouTube":"https://ed.ted.com/lessons/the-psychology-of-love-helen-fisher",
+  "What Is Your Attachment Style?|YouTube / The School of Life":"https://www.youtube.com/watch?v=2s9ACDMcpjA",
+  "《Attached》|书":"https://www.penguinrandomhouse.com/books/307913/attached-by-amir-levine-and-rachel-heller/",
+  "Attachment Theory in Action|YouTube / The School of Life":"https://www.youtube.com/watch?v=WjOowWxOXCg",
+  "Learning to Squat | The Starting Strength Method|Starting Strength / YouTube":"https://www.youtube.com/watch?v=nhoikoUEI8U",
+  "《Starting Strength: Basic Barbell Training》|书":"https://aasgaardco.com/store/books-posters-dvd/books/starting-strength-basic-barbell-training/",
+  "How to Deadlift|Starting Strength / YouTube":"https://www.youtube.com/watch?v=p2OPUi4xGrM",
+  "Successful Negotiation: Essential Strategies and Skills|Coursera / University of Michigan":"https://www.coursera.org/learn/negotiation-skills",
+  "《Getting to Yes》|书":"https://www.penguinrandomhouse.com/books/56554/getting-to-yes-by-roger-fisher-and-william-ury/",
+  "The Art of Negotiation|TED / YouTube":"https://www.ted.com/talks/william_ury_the_walk_from_no_to_yes",
+  "Making Marriage Work | Dr. John Gottman|YouTube / The Gottman Institute":"https://www.gottman.com/product/the-art-and-science-of-love-online/",
+  "《The Relationship Cure》|书":"https://www.gottman.com/product/the-relationship-cure/",
+  "The Science of Love|The Gottman Institute / YouTube":"https://www.gottman.com/about/research/",
+  "Fundamentals of Graphic Design|Coursera / CalArts":"https://www.coursera.org/learn/fundamentals-of-graphic-design",
+  "Ways of Seeing|BBC / Internet Archive":"https://archive.org/details/WaysOfSeeing",
+  "《The Design of Everyday Things》|书":"https://jnd.org/books/the-design-of-everyday-things-revised-and-expanded-edition/",
+  "Science & Cooking: From Haute Cuisine to Soft Matter Science|edX / HarvardX":"https://www.edx.org/learn/cooking/harvard-university-science-cooking-from-haute-cuisine-to-soft-matter-science-physics",
+  "《Salt, Fat, Acid, Heat》|书":"https://www.saltfatacidheat.com/book",
+  "Basics with Babish|YouTube":"https://www.youtube.com/playlist?list=PLopY4n17t8RBuyIohlCY9G8sbyXrdEJls",
+  "De-Mystifying Mindfulness|Coursera / Leiden University":"https://www.coursera.org/learn/mindfulness",
+  "Mindfulness-Based Stress Reduction Guided Practices|UC San Diego Center for Mindfulness":"https://cih.ucsd.edu/mindfulness/guided-audio-video",
+  "《Full Catastrophe Living》|书":"https://www.penguinrandomhouse.com/books/88148/full-catastrophe-living-revised-edition-by-jon-kabat-zinn/",
+  "Ask This Old House|PBS":"https://www.pbs.org/show/ask-old-house/",
+  "《The Way Things Work Now》|书":"https://www.dk.com/us/book/9781465440125-the-way-things-work-now/",
+  "This Old House: Home Improvement Videos|YouTube":"https://www.youtube.com/user/thisoldhouse",
+  "Everyday Parenting: The ABCs of Child Rearing|Coursera / Yale":"https://www.coursera.org/learn/everyday-parenting",
+  "《How to Talk So Kids Will Listen & Listen So Kids Will Talk》|书":"https://www.simonandschuster.com/books/How-to-Talk-So-Kids-Will-Listen-Listen-So-Kids-Will-Talk/Adele-Faber/The-How-To-Talk-Series/9781451663884",
+  "The Whole-Brain Child|书":"https://www.penguinrandomhouse.com/books/309928/the-whole-brain-child-by-daniel-j-siegel-and-tina-payne-bryson/"
+};
+const CN_SUBFIELDS={
+  "财商 / 个人金融": [],
+  "健康医学素养": [],
+  "睡眠科学（结构/节律/睡眠债）": [],
+  "职业肌骨损伤防护（颈椎/腰椎）": [],
+  "求职劳动权益与劳动仲裁": [],
+  "安全与应急 / 急救": [],
+  "保险素养": [],
+  "房产常识": [],
+  "数字安全与防诈骗": [],
+  "法律常识": [],
+  "行政 / 社保公积金 / 个税": [],
+  "驾驶与交通安全": [],
+  "食品配料表与营养标签解读": [],
+  "口腔牙周健康与看牙求生": [],
+  "体检报告解读与异常指标处理": [],
+  "居家安全（燃气/用电/一氧化碳）": [],
+  "消费维权实操（退款/投诉/举证）": [],
+  "信用与贷款常识": [],
+  "医保报销规则与就医省钱": [],
+  "遗嘱与财产传承": [],
+  "科学减脂与体重管理认知": [],
+  "经济学与激励理论": [],
+  "概率与风险 / 期望值思维": [],
+  "社会心理学与影响力": [],
+  "科学方法论与可证伪思维": [],
+  "逻辑学与谬误识别": [],
+  "系统思维与复杂性": [],
+  "博弈论": [],
+  "各行业运行逻辑": [],
+  "历史与政治经济": [],
+  "消费决策与反消费主义": [],
+  "副业与第二收入": [],
+  "学习科学 / 如何学习": [],
+  "提问 · 检索 · AI 使用素养": [],
+  "AI Agent 编排与自治工作流": [],
+  "信息与统计素养": [],
+  "信息饮食与高信噪比信息源治理": [],
+  "写作与结构化表达": [],
+  "决策科学": [],
+  "时间与精力管理": [],
+  "项目管理（生活与工作）": [],
+  "情绪与认知科学（Fi）": [],
+  "社交与沟通": [],
+  "中国特色人际关系（职场/人情/面子）": [],
+  "两性关系与婚恋博弈（当下语境）": [],
+  "成人依恋类型与关系重构": [],
+  "力量训练 / 一项纯身体技能": [],
+  "谈判与说服": [],
+  "亲密关系认知": [],
+  "审美创作输出": [],
+  "烹饪": [],
+  "冥想 / 正念": [],
+  "基础工程 / 家居与万物运转": [],
+  "亲子沟通与情绪教养（非暴力养育）": []
+};
+const CN_RESOURCES={
+  "财商 / 个人金融":[
+    {title:"中国投资者网",platform:"证监会系统",kind:"中文官方",url:"https://www.investor.org.cn/",why:"A股、基金、证券账户和防非法荐股的投资者教育入口"},
+    {title:"国家金融监督管理总局",platform:"金融监管总局",kind:"中文官方",url:"https://www.nfra.gov.cn/",why:"银行、保险、消费者权益和风险提示的权威来源"}
+  ],
+  "健康医学素养":[
+    {title:"中国疾病预防控制中心",platform:"中国疾控中心",kind:"中文官方",url:"https://www.chinacdc.cn/",why:"传染病、疫苗、慢病和公共卫生科普"},
+    {title:"默沙东诊疗手册中文版",platform:"MSD Manual",kind:"中文医学手册",url:"https://www.msdmanuals.cn/",why:"适合普通人查疾病、检查和用药背景知识"}
+  ],
+  "睡眠科学（结构/节律/睡眠债）":[
+    {title:"中国睡眠研究会",platform:"学会/科普",kind:"中文资料",url:"https://www.csr.org.cn/",why:"国内睡眠医学与睡眠健康科普入口"},
+    {title:"中国疾控中心",platform:"中国疾控中心",kind:"中文官方",url:"https://www.chinacdc.cn/",why:"睡眠、慢病、心理健康相关公共卫生资料"}
+  ],
+  "职业肌骨损伤防护（颈椎/腰椎）":[
+    {title:"中国健康教育中心",platform:"国家卫健委直属机构",kind:"中文科普",url:"https://www.checc.org.cn/",why:"久坐、运动、职业健康相关大众科普"},
+    {title:"默沙东诊疗手册：骨骼肌肉疾病",platform:"MSD Manual 中文版",kind:"中文医学手册",url:"https://www.msdmanuals.cn/home/bone,-joint,-and-muscle-disorders",why:"查颈肩腰腿痛、损伤和就医信号"}
+  ],
+  "求职劳动权益与劳动仲裁":[
+    {title:"人力资源和社会保障部",platform:"人社部",kind:"中文官方",url:"https://www.mohrss.gov.cn/",why:"劳动合同、社保、仲裁政策的源头"},
+    {title:"中国法律服务网",platform:"司法部",kind:"中文官方",url:"https://www.12348.gov.cn/",why:"法律咨询、劳动纠纷和法律援助入口"}
+  ],
+  "安全与应急 / 急救":[
+    {title:"救在身边·红十字应急救护服务平台",platform:"中国红十字会",kind:"中文培训",url:"https://www.crcrx.org.cn/",why:"CPR、AED、创伤救护和线下培训入口"},
+    {title:"中国消防",platform:"应急管理部消防救援局",kind:"中文官方",url:"https://www.119.gov.cn/",why:"火灾逃生、消防器材和居家消防安全"}
+  ],
+  "保险素养":[
+    {title:"国家金融监督管理总局",platform:"金融监管总局",kind:"中文官方",url:"https://www.nfra.gov.cn/",why:"保险监管、风险提示和消费者权益"},
+    {title:"中国保险行业协会",platform:"行业协会",kind:"中文资料",url:"https://www.iachina.cn/",why:"保险知识、行业信息和消费者教育"}
+  ],
+  "房产常识":[
+    {title:"住房和城乡建设部",platform:"住建部",kind:"中文官方",url:"https://www.mohurd.gov.cn/",why:"房地产、住房保障、物业和工程建设政策"},
+    {title:"中国人民银行征信中心",platform:"央行征信中心",kind:"中文官方",url:"https://www.pbccrc.org.cn/",why:"房贷前必须理解的征信报告与信用记录"}
+  ],
+  "数字安全与防诈骗":[
+    {title:"公安部",platform:"公安部",kind:"中文官方",url:"https://www.mps.gov.cn/",why:"反诈、治安和网络违法犯罪提示"},
+    {title:"国家互联网应急中心 CNCERT",platform:"CNCERT",kind:"中文官方",url:"https://www.cert.org.cn/",why:"漏洞、网络安全事件和安全预警"}
+  ],
+  "法律常识":[
+    {title:"国家法律法规数据库",platform:"全国人大",kind:"中文官方",url:"https://flk.npc.gov.cn/",why:"查现行法律原文，避免二手解读失真"},
+    {title:"中国法律服务网",platform:"司法部",kind:"中文官方",url:"https://www.12348.gov.cn/",why:"法律咨询、案例和法律援助入口"}
+  ],
+  "行政 / 社保公积金 / 个税":[
+    {title:"国家政务服务平台",platform:"国务院办公厅",kind:"中文官方",url:"https://gjzwfw.www.gov.cn/",why:"证照、社保、公积金、办事入口汇总"},
+    {title:"国家社会保险公共服务平台",platform:"人社部",kind:"中文官方",url:"https://si.12333.gov.cn/",why:"社保查询、转移、待遇资格认证"}
+  ],
+  "驾驶与交通安全":[
+    {title:"公安部互联网交通安全综合服务管理平台",platform:"公安部交管局",kind:"中文官方",url:"https://gab.122.gov.cn/m/index/",why:"违章、驾驶证、机动车和交通安全服务"},
+    {title:"中国道路交通安全协会",platform:"行业协会",kind:"中文资料",url:"https://www.crsa.net.cn/",why:"交通安全宣传和驾驶风险教育"}
+  ],
+  "食品配料表与营养标签解读":[
+    {title:"中国居民膳食指南",platform:"中国营养学会",kind:"中文指南",url:"https://dg.cnsoc.org/",why:"膳食结构、营养建议和食物选择依据"},
+    {title:"国家食品安全风险评估中心",platform:"国家卫健委直属机构",kind:"中文官方",url:"https://www.cfsa.net.cn/",why:"食品安全标准、风险评估和科普资料"}
+  ],
+  "口腔牙周健康与看牙求生":[
+    {title:"中华口腔医学会",platform:"学会",kind:"中文资料",url:"https://www.cndent.com/",why:"口腔健康、牙周、种植和正畸科普入口"},
+    {title:"默沙东诊疗手册：口腔和牙科疾病",platform:"MSD Manual 中文版",kind:"中文医学手册",url:"https://www.msdmanuals.cn/home/mouth-and-dental-disorders",why:"查龋齿、牙周病、口腔症状和就医信号"}
+  ],
+  "体检报告解读与异常指标处理":[
+    {title:"默沙东诊疗手册中文版",platform:"MSD Manual",kind:"中文医学手册",url:"https://www.msdmanuals.cn/",why:"查体检异常指标背后的疾病和检查含义"},
+    {title:"中国健康教育中心",platform:"国家卫健委直属机构",kind:"中文科普",url:"https://www.checc.org.cn/",why:"慢病筛查、健康生活方式和体检科普"}
+  ],
+  "居家安全（燃气/用电/一氧化碳）":[
+    {title:"中华人民共和国应急管理部",platform:"应急管理部",kind:"中文官方",url:"https://www.mem.gov.cn/",why:"安全生产、防灾减灾和应急科普"},
+    {title:"中国消防",platform:"消防救援局",kind:"中文官方",url:"https://www.119.gov.cn/",why:"家庭火灾、电气火灾、燃气风险和逃生知识"}
+  ],
+  "消费维权实操（退款/投诉/举证）":[
+    {title:"全国12315平台",platform:"市场监管总局体系",kind:"中文官方",url:"https://www.12315.cn/",why:"消费投诉、举报、维权流程入口"},
+    {title:"中国消费者协会",platform:"中消协",kind:"中文资料",url:"https://www.cca.cn/",why:"消费警示、案例和维权知识"}
+  ],
+  "信用与贷款常识":[
+    {title:"中国人民银行征信中心",platform:"央行征信中心",kind:"中文官方",url:"https://www.pbccrc.org.cn/",why:"征信报告查询、异议处理和信用知识"},
+    {title:"国家金融监督管理总局",platform:"金融监管总局",kind:"中文官方",url:"https://www.nfra.gov.cn/",why:"贷款、银行消费者保护和金融风险提示"}
+  ],
+  "医保报销规则与就医省钱":[
+    {title:"国家医保服务平台",platform:"国家医保局",kind:"中文官方",url:"https://fuwu.nhsa.gov.cn/",why:"医保查询、异地备案、亲情账户和服务入口"},
+    {title:"医保支付小课堂",platform:"国家医保局",kind:"中文官方",url:"https://www.nhsa.gov.cn/col/col207/index.html",why:"医保支付、报销规则和政策问答"}
+  ],
+  "遗嘱与财产传承":[
+    {title:"国家法律法规数据库：民法典",platform:"全国人大",kind:"中文官方",url:"https://flk.npc.gov.cn/detail2.html?ZmY4MDgxODE3OTZhNjM2YTAxNzk4MjJhMTk2NDBjOTI%3D",why:"继承编、婚姻家庭编和物权规则原文"},
+    {title:"中国公证协会",platform:"中国公证协会",kind:"中文资料",url:"https://www.chinanotary.org.cn/",why:"遗嘱公证、继承公证和公证机构信息"}
+  ],
+  "科学减脂与体重管理认知":[
+    {title:"中国居民膳食指南",platform:"中国营养学会",kind:"中文指南",url:"https://dg.cnsoc.org/",why:"热量、膳食结构和健康饮食的国内指南"},
+    {title:"中国健康教育中心",platform:"国家卫健委直属机构",kind:"中文科普",url:"https://www.checc.org.cn/",why:"体重管理、慢病预防和健康生活方式"}
+  ],
+  "经济学与激励理论":[
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"可检索微观经济学、行为经济学和产业经济学课程"},
+    {title:"学堂在线",platform:"国内公开课平台",kind:"中文课程",url:"https://www.xuetangx.com/",why:"清华等高校经济学与管理课程入口"}
+  ],
+  "概率与风险 / 期望值思维":[
+    {title:"可汗学院中文版：统计与概率",platform:"Khan Academy 中文",kind:"中文课程",url:"https://zh.khanacademy.org/math/statistics-probability",why:"概率、统计和期望值的中文练习"},
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索概率论、统计学、数据分析课程"}
+  ],
+  "社会心理学与影响力":[
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索社会心理学、普通心理学和组织行为学课程"},
+    {title:"国家智慧教育公共服务平台",platform:"教育部",kind:"中文课程",url:"https://www.smartedu.cn/",why:"高校课程和职业教育资源入口"}
+  ],
+  "科学方法论与可证伪思维":[
+    {title:"科普中国",platform:"中国科协",kind:"中文科普",url:"https://www.kepuchina.cn/",why:"科学辟谣、科学方法和大众科普材料"},
+    {title:"中国科技论文在线",platform:"教育部科技发展中心",kind:"中文论文",url:"http://www.paper.edu.cn/",why:"练习看中文论文摘要、方法和证据质量"}
+  ],
+  "逻辑学与谬误识别":[
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索逻辑学、批判性思维和论证课程"},
+    {title:"国家哲学社会科学文献中心",platform:"社科文献",kind:"中文文献",url:"https://www.ncpssd.org/",why:"查逻辑学、哲学和社会科学中文论文"}
+  ],
+  "系统思维与复杂性":[
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索系统工程、管理科学和复杂系统课程"},
+    {title:"国家哲学社会科学文献中心",platform:"社科文献",kind:"中文文献",url:"https://www.ncpssd.org/",why:"查系统思维、复杂性和政策反馈研究"}
+  ],
+  "博弈论":[
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索博弈论、信息经济学和机制设计课程"},
+    {title:"学堂在线",platform:"国内公开课平台",kind:"中文课程",url:"https://www.xuetangx.com/",why:"高校博弈论与经济学课程入口"}
+  ],
+  "各行业运行逻辑":[
+    {title:"国家统计局",platform:"国家统计局",kind:"中文官方",url:"https://www.stats.gov.cn/",why:"行业数据、统计公报和宏观经济口径"},
+    {title:"艾瑞咨询研究报告",platform:"艾瑞咨询",kind:"中文行业报告",url:"https://www.iresearch.com.cn/",why:"互联网、消费、产业趋势报告入口"}
+  ],
+  "历史与政治经济":[
+    {title:"国家哲学社会科学文献中心",platform:"社科文献",kind:"中文文献",url:"https://www.ncpssd.org/",why:"历史、政治经济学和社会科学论文"},
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索中国历史、世界史、政治经济学课程"}
+  ],
+  "消费决策与反消费主义":[
+    {title:"中国消费者协会",platform:"中消协",kind:"中文资料",url:"https://www.cca.cn/",why:"消费警示、比较试验和典型案例"},
+    {title:"全国12315平台",platform:"市场监管总局体系",kind:"中文官方",url:"https://www.12315.cn/",why:"投诉举报和消费纠纷处理入口"}
+  ],
+  "副业与第二收入":[
+    {title:"国家企业信用信息公示系统",platform:"市场监管总局",kind:"中文官方",url:"https://www.gsxt.gov.cn/",why:"注册公司、查企业、识别合作方资质"},
+    {title:"国家税务总局",platform:"税务总局",kind:"中文官方",url:"https://www.chinatax.gov.cn/",why:"副业收入、个税、发票和经营主体税务规则"}
+  ],
+  "学习科学 / 如何学习":[
+    {title:"国家智慧教育公共服务平台",platform:"教育部",kind:"中文课程",url:"https://www.smartedu.cn/",why:"课程、教材和学习资源汇总"},
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索学习方法、教育心理学和认知心理学课程"}
+  ],
+  "提问 · 检索 · AI 使用素养":[
+    {title:"中国互联网联合辟谣平台",platform:"中央网信办违法和不良信息举报中心",kind:"中文事实核查",url:"https://www.piyao.org.cn/",why:"训练信息核验、谣言识别和来源交叉验证"},
+    {title:"阿里云百炼文档",platform:"阿里云",kind:"中文AI文档",url:"https://help.aliyun.com/zh/model-studio/",why:"中文大模型调用、提示词和应用搭建文档"}
+  ],
+  "AI Agent 编排与自治工作流":[
+    {title:"Dify 中文文档",platform:"Dify",kind:"中文文档",url:"https://docs.dify.ai/zh-hans",why:"工作流、知识库、工具调用和Agent应用搭建"},
+    {title:"扣子 Coze",platform:"字节跳动",kind:"中文平台",url:"https://www.coze.cn/",why:"低代码搭建国内可用的智能体和工作流"}
+  ],
+  "信息与统计素养":[
+    {title:"国家统计局",platform:"国家统计局",kind:"中文官方",url:"https://www.stats.gov.cn/",why:"统计公报、统计年鉴和指标口径"},
+    {title:"中国统计信息网",platform:"统计资料入口",kind:"中文资料",url:"https://www.tjcn.org/",why:"地方统计年鉴和区域数据索引"}
+  ],
+  "信息饮食与高信噪比信息源治理":[
+    {title:"中国互联网联合辟谣平台",platform:"中央网信办违法和不良信息举报中心",kind:"中文事实核查",url:"https://www.piyao.org.cn/",why:"核验热点谣言和学习辟谣方法"},
+    {title:"国家哲学社会科学文献中心",platform:"社科文献",kind:"中文文献",url:"https://www.ncpssd.org/",why:"用论文和一手文献替代低信噪比信息流"}
+  ],
+  "写作与结构化表达":[
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索大学写作、应用文写作和学术写作课程"},
+    {title:"少数派",platform:"效率与写作社区",kind:"中文文章",url:"https://sspai.com/",why:"中文工具写作、笔记系统和结构化表达实践"}
+  ],
+  "决策科学":[
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索管理决策、行为经济学和运筹学课程"},
+    {title:"国家哲学社会科学文献中心",platform:"社科文献",kind:"中文文献",url:"https://www.ncpssd.org/",why:"查决策科学、风险管理和组织行为研究"}
+  ],
+  "时间与精力管理":[
+    {title:"少数派",platform:"效率社区",kind:"中文文章",url:"https://sspai.com/",why:"时间管理、任务系统、数字工具和复盘实践"},
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索时间管理、职业发展和心理健康课程"}
+  ],
+  "项目管理（生活与工作）":[
+    {title:"PMI 中国",platform:"项目管理协会",kind:"中文资料",url:"https://www.pmi.org.cn/",why:"项目管理知识体系、认证和实践资料"},
+    {title:"华为云 DevCloud 文档",platform:"华为云",kind:"中文文档",url:"https://support.huaweicloud.com/devcloud/",why:"软件项目、敏捷协作和研发流程资料"}
+  ],
+  "情绪与认知科学（Fi）":[
+    {title:"北京大学第六医院",platform:"北医六院",kind:"中文医学科普",url:"https://www.pkuh6.cn/",why:"心理健康、精神医学和就医路径"},
+    {title:"简单心理",platform:"心理服务平台",kind:"中文资料",url:"https://www.jiandanxinli.com/",why:"心理咨询科普、情绪识别和关系议题文章"}
+  ],
+  "社交与沟通":[
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索沟通技巧、组织行为、演讲表达课程"},
+    {title:"Toastmasters International 找俱乐部",platform:"头马国际",kind:"线下练习",url:"https://www.toastmasters.org/find-a-club",why:"可查国内城市俱乐部，用线下演讲练习沟通"}
+  ],
+  "中国特色人际关系（职场/人情/面子）":[
+    {title:"《乡土中国》",platform:"豆瓣读书",kind:"中文书",url:"https://book.douban.com/subject/1200840/",why:"理解中国社会关系、人情和差序格局的基础读物"},
+    {title:"国家哲学社会科学文献中心",platform:"社科文献",kind:"中文文献",url:"https://www.ncpssd.org/",why:"查人情、面子、组织社会学和本土社会研究"}
+  ],
+  "两性关系与婚恋博弈（当下语境）":[
+    {title:"国家法律法规数据库：民法典",platform:"全国人大",kind:"中文官方",url:"https://flk.npc.gov.cn/detail2.html?ZmY4MDgxODE3OTZhNjM2YTAxNzk4MjJhMTk2NDBjOTI%3D",why:"婚姻家庭编、财产、债务和继承规则原文"},
+    {title:"中国法律服务网",platform:"司法部",kind:"中文官方",url:"https://www.12348.gov.cn/",why:"婚姻家庭纠纷、法律咨询和援助入口"}
+  ],
+  "成人依恋类型与关系重构":[
+    {title:"简单心理",platform:"心理服务平台",kind:"中文资料",url:"https://www.jiandanxinli.com/",why:"依恋、亲密关系、咨询科普和自助文章"},
+    {title:"北京大学第六医院",platform:"北医六院",kind:"中文医学科普",url:"https://www.pkuh6.cn/",why:"心理健康和精神卫生的专业就医路径"}
+  ],
+  "力量训练 / 一项纯身体技能":[
+    {title:"国家体育总局",platform:"国家体育总局",kind:"中文官方",url:"https://www.sport.gov.cn/",why:"全民健身、运动健康和体育政策资料"},
+    {title:"中国健美协会",platform:"行业协会",kind:"中文资料",url:"https://www.cbba.cn/",why:"力量训练、健身赛事和训练体系入口"}
+  ],
+  "谈判与说服":[
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索商务谈判、沟通与管理课程"},
+    {title:"国家法律法规数据库",platform:"全国人大",kind:"中文官方",url:"https://flk.npc.gov.cn/",why:"谈判落地到合同条款时查法律原文"}
+  ],
+  "亲密关系认知":[
+    {title:"简单心理",platform:"心理服务平台",kind:"中文资料",url:"https://www.jiandanxinli.com/",why:"亲密关系、冲突修复、依恋和咨询科普"},
+    {title:"中国法律服务网",platform:"司法部",kind:"中文官方",url:"https://www.12348.gov.cn/",why:"婚姻家庭、财产和关系边界的法律咨询入口"}
+  ],
+  "审美创作输出":[
+    {title:"站酷",platform:"设计社区",kind:"中文作品/教程",url:"https://www.zcool.com.cn/",why:"中文设计作品、作品集和商业视觉参考"},
+    {title:"中国大学MOOC",platform:"国内公开课平台",kind:"中文课程",url:"https://www.icourse163.org/",why:"检索摄影、设计、美术史和艺术鉴赏课程"}
+  ],
+  "烹饪":[
+    {title:"下厨房",platform:"中文菜谱社区",kind:"中文教程",url:"https://www.xiachufang.com/",why:"中式家常菜谱、备餐和厨房实践"},
+    {title:"中国居民膳食指南",platform:"中国营养学会",kind:"中文指南",url:"https://dg.cnsoc.org/",why:"把烹饪和健康饮食结合起来"}
+  ],
+  "冥想 / 正念":[
+    {title:"简单心理",platform:"心理服务平台",kind:"中文资料",url:"https://www.jiandanxinli.com/",why:"正念、焦虑、压力管理和咨询科普"},
+    {title:"潮汐 Tide",platform:"中文App",kind:"练习工具",url:"https://tide.fm/",why:"中文环境下做呼吸、睡眠和正念练习"}
+  ],
+  "基础工程 / 家居与万物运转":[
+    {title:"住房和城乡建设部",platform:"住建部",kind:"中文官方",url:"https://www.mohurd.gov.cn/",why:"房屋、装修、物业和工程建设政策资料"},
+    {title:"中国消防",platform:"消防救援局",kind:"中文官方",url:"https://www.119.gov.cn/",why:"居家用电、燃气、消防和逃生安全"}
+  ],
+  "亲子沟通与情绪教养（非暴力养育）":[
+    {title:"中华人民共和国家庭教育促进法",platform:"中国政府网",kind:"中文官方",url:"https://www.gov.cn/xinwen/2021-10/23/content_5644663.htm",why:"家庭教育责任、边界和法律框架"},
+    {title:"中国家庭教育学会",platform:"学会",kind:"中文资料",url:"https://www.cfe.org.cn/",why:"家庭教育、亲子沟通和儿童发展资料入口"}
+  ]
+};
+const PRACTICAL_CN_RESOURCES={
+  "财商 / 个人金融": [
+    {
+      "title": "且慢：长钱投资工具",
+      "platform": "且慢",
+      "kind": "工具/文章",
+      "url": "https://qieman.com/",
+      "why": "适合理解指数基金、组合投资和长期资产配置"
+    }
+  ],
+  "健康医学素养": [
+    {
+      "title": "丁香医生",
+      "platform": "丁香园",
+      "kind": "中文医学科普",
+      "url": "https://dxy.com/",
+      "why": "症状、疾病、用药和就医科普，比泛泛养生号可靠"
+    }
+  ],
+  "睡眠科学（结构/节律/睡眠债）": [
+    {
+      "title": "睡眠浅，睡眠质量差，每天坚持2个方法帮你进入深度睡眠",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV1kA411H72W",
+      "why": "比泛泛鸡汤更适合落到睡眠作息和失眠处理"
+    },
+    {
+      "title": "丁香医生：睡眠/失眠科普",
+      "platform": "丁香医生",
+      "kind": "中文文章",
+      "url": "https://dxy.com/",
+      "why": "查失眠、打鼾、睡眠障碍和就医信号"
+    }
+  ],
+  "职业肌骨损伤防护（颈椎/腰椎）": [
+    {
+      "title": "【腰突久坐必备】办公族+腰突，到底该怎么“坐”？自我调整方法",
+      "platform": "哔哩哔哩",
+      "kind": "动作演示",
+      "url": "https://www.bilibili.com/video/BV1Dg4y1H74J",
+      "why": "动作和工位调整必须看演示，适合边看边做"
+    },
+    {
+      "title": "丁香医生：颈肩腰腿痛",
+      "platform": "丁香医生",
+      "kind": "中文科普",
+      "url": "https://dxy.com/",
+      "why": "用来判断哪些疼痛可以自我管理，哪些该去康复科/骨科"
+    }
+  ],
+  "求职劳动权益与劳动仲裁": [
+    {
+      "title": "中国法律服务网",
+      "platform": "司法部",
+      "kind": "办事/咨询",
+      "url": "https://www.12348.gov.cn/",
+      "why": "需要落地时查当地法律服务、法律援助和咨询入口"
+    }
+  ],
+  "安全与应急 / 急救": [
+    {
+      "title": "救在身边·红十字应急救护服务平台",
+      "platform": "中国红十字会",
+      "kind": "培训入口",
+      "url": "https://www.crcrx.org.cn/",
+      "why": "用于找课程、练习和认证"
+    }
+  ],
+  "保险素养": [
+    {
+      "title": "【重疾险测评】支付宝健康福系列重疾险值得买么，50万保额，总保费=190万？？",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV1R64y1P7n7",
+      "why": "先学条款、免责、健康告知和配置顺序"
+    },
+    {
+      "title": "深蓝保",
+      "platform": "保险科普/测评",
+      "kind": "中文资料",
+      "url": "https://www.shenlanbao.com/",
+      "why": "偏实用的保险科普、产品解释和配置思路"
+    }
+  ],
+  "房产常识": [
+    {
+      "title": "贝壳找房百科/工具",
+      "platform": "贝壳",
+      "kind": "工具/文章",
+      "url": "https://www.ke.com/",
+      "why": "查小区、成交、房贷、交易流程和房产词条"
+    }
+  ],
+  "法律常识": [
+    {
+      "title": "中国法律服务网",
+      "platform": "司法部",
+      "kind": "办事/咨询",
+      "url": "https://www.12348.gov.cn/",
+      "why": "需要维权时找咨询、法律援助和本地服务"
+    }
+  ],
+  "行政 / 社保公积金 / 个税": [
+    {
+      "title": "公司社保、公积金账户操作",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV18a4y1r7Q3",
+      "why": "每年能用，直接跟着做专项扣除和汇算"
+    },
+    {
+      "title": "国家社会保险公共服务平台",
+      "platform": "人社部",
+      "kind": "办事工具",
+      "url": "https://si.12333.gov.cn/",
+      "why": "社保查询、转移和待遇资格认证"
+    }
+  ],
+  "驾驶与交通安全": [
+    {
+      "title": "交管12123网页版",
+      "platform": "公安部交管局",
+      "kind": "办事工具",
+      "url": "https://gab.122.gov.cn/m/index/",
+      "why": "处理驾驶证、机动车、违法和考试预约"
+    }
+  ],
+  "食品配料表与营养标签解读": [
+    {
+      "title": "薄荷食物库",
+      "platform": "薄荷健康",
+      "kind": "查询工具",
+      "url": "https://www.boohee.com/food/",
+      "why": "查热量、营养成分和常见食物数据"
+    }
+  ],
+  "口腔牙周健康与看牙求生": [
+    {
+      "title": "丁香医生：口腔健康",
+      "platform": "丁香医生",
+      "kind": "中文科普",
+      "url": "https://dxy.com/",
+      "why": "查牙周、龋齿、洗牙、种植和正畸科普"
+    }
+  ],
+  "体检报告解读与异常指标处理": [
+    {
+      "title": "丁香医生：体检/指标",
+      "platform": "丁香医生",
+      "kind": "中文科普",
+      "url": "https://dxy.com/",
+      "why": "查常见异常指标和检查项目含义"
+    }
+  ],
+  "居家安全（燃气/用电/一氧化碳）": [
+    {
+      "title": "中国消防",
+      "platform": "消防救援局",
+      "kind": "安全科普",
+      "url": "https://www.119.gov.cn/",
+      "why": "家庭消防、逃生和用电安全资料"
+    }
+  ],
+  "消费维权实操（退款/投诉/举证）": [
+    {
+      "title": "个人经历闲鱼买玩具，闲鱼售后维权是怎样的？12315投诉有用吗？",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV1NZTg6fEH1",
+      "why": "学习投诉路径、证据整理和话术"
+    },
+    {
+      "title": "黑猫投诉",
+      "platform": "新浪",
+      "kind": "投诉平台",
+      "url": "https://tousu.sina.com.cn/",
+      "why": "适合平台消费、教培、预付卡等纠纷曝光和协商"
+    }
+  ],
+  "信用与贷款常识": [
+    {
+      "title": "央行征信中心",
+      "platform": "中国人民银行",
+      "kind": "查询工具",
+      "url": "https://www.pbccrc.org.cn/",
+      "why": "查个人征信、异议处理和信用报告"
+    }
+  ],
+  "医保报销规则与就医省钱": [
+    {
+      "title": "珠海门诊统筹和共济，看病省下大钱",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV1RCDGYfE7W",
+      "why": "直接学习怎么省钱和怎么备案"
+    },
+    {
+      "title": "国家医保服务平台",
+      "platform": "国家医保局",
+      "kind": "办事工具",
+      "url": "https://fuwu.nhsa.gov.cn/",
+      "why": "查医保、办异地备案、绑定亲情账户"
+    }
+  ],
+  "遗嘱与财产传承": [
+    {
+      "title": "中国法律服务网",
+      "platform": "司法部",
+      "kind": "咨询入口",
+      "url": "https://www.12348.gov.cn/",
+      "why": "需要起草或确认时找法律咨询和公证服务"
+    }
+  ],
+  "科学减脂与体重管理认知": [
+    {
+      "title": "减肥期间应该如何点外卖？这几个技巧，让你吃外卖也能越吃越瘦！【健康餐】",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV1B44y1y7ri",
+      "why": "能直接改饮食、训练和记录习惯"
+    },
+    {
+      "title": "薄荷食物库",
+      "platform": "薄荷健康",
+      "kind": "查询工具",
+      "url": "https://www.boohee.com/food/",
+      "why": "查热量、营养成分和外卖替代选择"
+    }
+  ],
+  "经济学与激励理论": [
+    {
+      "title": "经济学十大原理-4、人们会对激励作出反应",
+      "platform": "哔哩哔哩",
+      "kind": "中文课程",
+      "url": "https://www.bilibili.com/video/BV1LK411f7Qi",
+      "why": "用中文例子理解价格、激励和市场机制"
+    },
+    {
+      "title": "得到",
+      "platform": "得到App",
+      "kind": "中文课程",
+      "url": "https://www.dedao.cn/",
+      "why": "检索经济学、商业和社会运行逻辑课程"
+    }
+  ],
+  "概率与风险 / 期望值思维": [
+    {
+      "title": "可汗学院中文版：统计与概率",
+      "platform": "Khan Academy 中文",
+      "kind": "练习课程",
+      "url": "https://zh.khanacademy.org/math/statistics-probability",
+      "why": "适合补概念和刷基础练习"
+    }
+  ],
+  "社会心理学与影响力": [
+    {
+      "title": "简单心理",
+      "platform": "心理服务平台",
+      "kind": "中文文章",
+      "url": "https://www.jiandanxinli.com/",
+      "why": "心理学和关系议题的可读中文资料"
+    }
+  ],
+  "科学方法论与可证伪思维": [
+    {
+      "title": "科普中国",
+      "platform": "中国科协",
+      "kind": "中文科普",
+      "url": "https://www.kepuchina.cn/",
+      "why": "用来核验常见科学谣言和科普结论"
+    }
+  ],
+  "系统思维与复杂性": [
+    {
+      "title": "反馈回路的思维模型",
+      "platform": "哔哩哔哩",
+      "kind": "中文课程",
+      "url": "https://www.bilibili.com/video/BV1ZK4y1j7Qg",
+      "why": "用图和案例理解反馈、延迟和二阶效应"
+    }
+  ],
+  "博弈论": [
+    {
+      "title": "博弈论纳什均衡求解。静态完全信息的考察内容。",
+      "platform": "哔哩哔哩",
+      "kind": "中文课程",
+      "url": "https://www.bilibili.com/video/BV1ca4y1i7ur",
+      "why": "用生活案例理解策略互动"
+    }
+  ],
+  "各行业运行逻辑": [
+    {
+      "title": "69%毛利率只卖20倍PE？拆解新产业的多空生死局",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV1sDKX66EFB",
+      "why": "用具体行业拆解训练商业直觉"
+    },
+    {
+      "title": "36氪",
+      "platform": "商业媒体",
+      "kind": "行业文章",
+      "url": "https://36kr.com/",
+      "why": "追踪公司、行业、创业和商业模式变化"
+    }
+  ],
+  "历史与政治经济": [
+    {
+      "title": "国家哲学社会科学文献中心",
+      "platform": "社科文献",
+      "kind": "中文文献",
+      "url": "https://www.ncpssd.org/",
+      "why": "需要严肃材料时查论文和学术综述"
+    }
+  ],
+  "消费决策与反消费主义": [
+    {
+      "title": "什么值得买",
+      "platform": "消费社区",
+      "kind": "比价/经验",
+      "url": "https://www.smzdm.com/",
+      "why": "查真实使用经验、价格历史和替代选择"
+    }
+  ],
+  "副业与第二收入": [
+    {
+      "title": "国家企业信用信息公示系统",
+      "platform": "市场监管总局",
+      "kind": "查询工具",
+      "url": "https://www.gsxt.gov.cn/",
+      "why": "查合作方、注册主体和企业信用"
+    }
+  ],
+  "AI Agent 编排与自治工作流": [
+    {
+      "title": "Dify 中文文档",
+      "platform": "Dify",
+      "kind": "中文文档",
+      "url": "https://docs.dify.ai/zh-hans",
+      "why": "工作流、知识库、工具调用和Agent应用搭建"
+    },
+    {
+      "title": "【2026版】B站讲的最好的Coze（扣子）从入门到精通！涵盖coze智能体搭建_coze工作流教程_coze应用开发 ——基础/应用/工作流/搭建智能体！",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV1WME76iELS",
+      "why": "跟着做一个能跑的中文Agent"
+    }
+  ],
+  "信息与统计素养": [
+    {
+      "title": "第3章 数据的图表展示",
+      "platform": "哔哩哔哩",
+      "kind": "中文课程",
+      "url": "https://www.bilibili.com/video/BV1EEHretEpP",
+      "why": "建立判断数据、图表和新闻数字的能力"
+    },
+    {
+      "title": "国家统计局",
+      "platform": "国家统计局",
+      "kind": "数据源",
+      "url": "https://www.stats.gov.cn/",
+      "why": "练习查一手数据和统计口径"
+    }
+  ],
+  "信息饮食与高信噪比信息源治理": [
+    {
+      "title": "使用Feed43制作RSS订阅源，并获取全文，我的RSS自制教程",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV1bY411w7rH",
+      "why": "把信息摄入从算法流改成主动订阅"
+    },
+    {
+      "title": "RSSHub 中文文档",
+      "platform": "RSSHub",
+      "kind": "工具文档",
+      "url": "https://docs.rsshub.app/zh/",
+      "why": "搭建高信噪比订阅源"
+    }
+  ],
+  "时间与精力管理": [
+    {
+      "title": "【直播回放】庄明科老师《时间管理与效率提升》",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV1zE411V72P",
+      "why": "从工具、日程块和复盘开始落地"
+    }
+  ],
+  "项目管理（生活与工作）": [
+    {
+      "title": "飞书项目",
+      "platform": "飞书",
+      "kind": "工具",
+      "url": "https://www.feishu.cn/product/project",
+      "why": "用具体工具练习里程碑、任务、风险和协作"
+    }
+  ],
+  "情绪与认知科学（Fi）": [
+    {
+      "title": "简单心理",
+      "platform": "心理服务平台",
+      "kind": "中文资料",
+      "url": "https://www.jiandanxinli.com/",
+      "why": "情绪、压力、咨询和自我觉察科普"
+    }
+  ],
+  "社交与沟通": [
+    {
+      "title": "Toastmasters 找俱乐部",
+      "platform": "头马国际",
+      "kind": "线下练习",
+      "url": "https://www.toastmasters.org/find-a-club",
+      "why": "演讲和即兴表达需要线下反馈"
+    }
+  ],
+  "中国特色人际关系（职场/人情/面子）": [
+    {
+      "title": "教你如何向领导汇报工作 (全12集) 强烈推荐",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV1Xe411w71q",
+      "why": "学会读场合、给面子和保护边界"
+    },
+    {
+      "title": "《乡土中国》",
+      "platform": "豆瓣读书",
+      "kind": "中文书",
+      "url": "https://book.douban.com/subject/1200840/",
+      "why": "理解差序格局、人情和本土社会关系的底层文本"
+    }
+  ],
+  "两性关系与婚恋博弈（当下语境）": [
+    {
+      "title": "中国法律服务网",
+      "platform": "司法部",
+      "kind": "咨询入口",
+      "url": "https://www.12348.gov.cn/",
+      "why": "遇到具体关系和财产问题时找法律咨询"
+    }
+  ],
+  "成人依恋类型与关系重构": [
+    {
+      "title": "回避型在亲密关系中为何排斥肢体接触",
+      "platform": "哔哩哔哩",
+      "kind": "中文视频",
+      "url": "https://www.bilibili.com/video/BV1AhwreDEtA",
+      "why": "帮助识别自己的激活/去激活策略"
+    },
+    {
+      "title": "简单心理",
+      "platform": "心理服务平台",
+      "kind": "中文资料",
+      "url": "https://www.jiandanxinli.com/",
+      "why": "依恋、亲密关系和咨询科普"
+    }
+  ],
+  "力量训练 / 一项纯身体技能": [
+    {
+      "title": "健身小白必学动作｜深蹲·硬拉·卧推·划船·推肩的细节要点透析（附操作）",
+      "platform": "哔哩哔哩",
+      "kind": "动作演示",
+      "url": "https://www.bilibili.com/video/BV1So4y1k7Qg",
+      "why": "力量训练必须看动作和纠错演示"
+    },
+    {
+      "title": "Keep",
+      "platform": "Keep",
+      "kind": "训练工具",
+      "url": "https://www.gotokeep.com/",
+      "why": "用计划、记录和动作库把练习稳定下来"
+    }
+  ],
+  "亲密关系认知": [
+    {
+      "title": "简单心理",
+      "platform": "心理服务平台",
+      "kind": "中文资料",
+      "url": "https://www.jiandanxinli.com/",
+      "why": "亲密关系、依恋和心理咨询科普"
+    }
+  ],
+  "审美创作输出": [
+    {
+      "title": "站酷",
+      "platform": "设计社区",
+      "kind": "作品/教程",
+      "url": "https://www.zcool.com.cn/",
+      "why": "看中文商业设计、作品集和视觉参考"
+    }
+  ],
+  "烹饪": [
+    {
+      "title": "更有效率的备餐，懒人、上班族、一个人生活也能轻松做出好吃又不重复的一日三餐！",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV1nV411c7oP",
+      "why": "烹饪最适合边看边做"
+    },
+    {
+      "title": "下厨房",
+      "platform": "中文菜谱社区",
+      "kind": "菜谱工具",
+      "url": "https://www.xiachufang.com/",
+      "why": "查家常菜、备餐和中式调味"
+    }
+  ],
+  "冥想 / 正念": [
+    {
+      "title": "潮汐 Tide",
+      "platform": "中文App",
+      "kind": "练习工具",
+      "url": "https://tide.fm/",
+      "why": "呼吸、睡眠和正念练习工具"
+    }
+  ],
+  "基础工程 / 家居与万物运转": [
+    {
+      "title": "住小帮",
+      "platform": "家装社区",
+      "kind": "中文经验",
+      "url": "https://www.zhuxiaobang.com/",
+      "why": "查装修、家居动线、材料和避坑经验"
+    }
+  ],
+  "亲子沟通与情绪教养（非暴力养育）": [
+    {
+      "title": "我们深爱对方，但却用暴力表达。非暴力沟通，从对孩子和老人开始。",
+      "platform": "哔哩哔哩",
+      "kind": "实操视频",
+      "url": "https://www.bilibili.com/video/BV1LR4y1W7nP",
+      "why": "用场景话术学习设边界和共情"
+    },
+    {
+      "title": "中国家庭教育学会",
+      "platform": "学会",
+      "kind": "中文资料",
+      "url": "https://www.cfe.org.cn/",
+      "why": "家庭教育、亲子沟通和儿童发展资料"
+    }
+  ]
+};
+
+Object.assign(CN_RESOURCES,PRACTICAL_CN_RESOURCES);
+function referenceKey(t){
+  return `${t.title}|${t.platform||""}`;
+}
+function referenceHref(t){
+  const direct=t.url||t.href||t.link||REF_URLS[referenceKey(t)]||REF_URLS[t.title];
+  if(direct) return direct;
+  return "#";
+}
+function referenceTitleHTML(t){
+  const title=escapeHTML(t.title||"参考资料");
+  const href=escapeHTML(referenceHref(t));
+  return `<a class="ref-link" href="${href}" target="_blank" rel="noopener noreferrer">${title}</a>`;
+}
+function uniq(arr){
+  return [...new Set(arr.filter(Boolean))];
+}
+function resourceListHTML(list){
+  return (list||[]).map(t=>`<li><b>${referenceTitleHTML(t)}</b> <span class="ktag">${escapeHTML(t.kind||"资料")}</span> · ${escapeHTML(t.platform||"")} <small>${escapeHTML(t.why||"")}</small></li>`).join("")||'<li><span class="empty2">生成中…</span></li>';
+}
+function detailHTML(d,open,colspan){
+  const det=DETAILS[d.name]||{};
+  const subs=uniq([...(det.sub||[]),...(CN_SUBFIELDS[d.name]||[])]).map(s=>{
+    if(typeof s==="string") return `<span class="chip">${escapeHTML(s)}</span>`;
+    const _raw=""+(s.t||"");
+    const _dur=/^\d+:\d{1,2}(:\d{2})?$/.test(_raw.trim());   // t 被抓成时长的脏值：明确标"时长"，不当标题
+    const tip=(_dur?`⏱ 时长 ${_raw}`:_raw.replace(/["<>]/g,""))+(s.p>=0?` · 播放${s.p}`:"");
+    return `<a class="chip" href="${s.u}" target="_blank" rel="noopener" title="${tip}" style="color:var(--B);text-decoration:none">${escapeHTML(s.n)} <small style="color:var(--dim)">▶</small></a>`;
+  }).join("")||'<span class="empty2">生成中…</span>';
+  const tuts=resourceListHTML(det.tut||[]);
+  const cnrefs=resourceListHTML(CN_RESOURCES[d.name]||[]);
+  return `<tr class="detail" style="display:${open?"":"none"}"><td colspan="${colspan}">
+    <div class="detail-wrap">
+      <div><div class="dh">子领域（要学的细分方向）</div><div class="subs">${subs}</div></div>
+      <div><div class="dh">学习教程（视频为主 · 入门友好）</div><ul class="tuts">${tuts}</ul></div>
+      <div><div class="dh">实用中文资料（视频/工具/社区优先）</div><ul class="tuts">${cnrefs}</ul></div>
+    </div></td></tr>`;
+}
+function rowHTML(d){
+  const open=state.expanded.has(d.name);
+  return `<tr class="drow${open?" expanded":""}" data-name="${d.name}">
+    <td><div class="dname">${d.name}</div></td>
+    <td><div class="dwhy">${d.why}</div></td>
+    ${metricCell(d,"score")}${metricCell(d,"ret")}${metricCell(d,"cost")}${metricCell(d,"freq")}${metricCell(d,"roi")}
+    <td class="center"><span class="pill ${TIER_CL[d.tier]}">${d.tier}</span></td>
+    <td><div class="dmat"><b>资料</b> ${d.mat}<br><b>目标</b> ${d.ceil}</div></td>
+  </tr>${detailHTML(d,open,9)}`;
+}
+function rowHTMLflat(d){
+  const t=TYPE[d.type], open=state.expanded.has(d.name);
+  return `<tr class="drow${open?" expanded":""}" data-name="${d.name}">
+    <td><span style="color:${t.c};font-size:15px;line-height:1;vertical-align:middle">●</span> ${d.type}</td>
+    <td><div class="dname">${d.name}</div></td>
+    <td><div class="dwhy">${d.why}</div></td>
+    ${metricCell(d,"score")}${metricCell(d,"ret")}${metricCell(d,"cost")}${metricCell(d,"freq")}${metricCell(d,"roi")}
+    <td class="center"><span class="pill ${TIER_CL[d.tier]}">${d.tier}</span></td>
+    <td><div class="dmat"><b>资料</b> ${d.mat}<br><b>目标</b> ${d.ceil}</div></td>
+  </tr>${detailHTML(d,open,10)}`;
+}
+function tableHTMLFlat(list){
+  const si=k=> state.sort===k ? `<span class="arr">${state.dir==="desc"?"▼":"▲"}</span>` : "";
+  return `<section>
+    <div class="sec-head"><span class="dot" style="background:#cbd5e1"></span>
+      <span class="sec-title">全部领域（平铺）</span><span class="sec-desc">按当前排序全局排列，方便跨类型横向比较</span></div>
+    <div class="twrap"><table><thead><tr>
+      <th style="width:56px">类型</th>
+      <th style="width:168px">领域</th>
+      <th>为什么对你</th>
+      <th class="center sortable" data-k="score">推荐分 ${si("score")}</th>
+      <th class="center sortable" data-k="ret">收益 ${si("ret")}</th>
+      <th class="center sortable" data-k="cost">成本 ${si("cost")}</th>
+      <th class="center sortable" data-k="freq">频率 ${si("freq")}</th>
+      <th class="center sortable" data-k="roi">性价比 ${si("roi")}</th>
+      <th class="center sortable" data-k="tier">强度 ${si("tier")}</th>
+      <th style="width:220px">资料 · 目标</th>
+    </tr></thead>
+    <tbody>${list.length?list.map(rowHTMLflat).join(""):`<tr><td colspan="10" class="empty">无匹配项</td></tr>`}</tbody></table></div></section>`;
+}
+function tableHTML(type,list){
+  const t=TYPE[type];
+  const si=k=> state.sort===k ? `<span class="arr">${state.dir==="desc"?"▼":"▲"}</span>` : "";
+  return `<section>
+    <div class="sec-head"><span class="dot" style="background:${t.c}"></span>
+      <span class="sec-title">${t.n}</span><span class="sec-desc">${t.d}</span></div>
+    <div class="twrap"><table><thead><tr>
+      <th style="width:168px">领域</th>
+      <th>为什么对你</th>
+      <th class="center sortable" data-k="score">推荐分 ${si("score")}</th>
+      <th class="center sortable" data-k="ret">收益 ${si("ret")}</th>
+      <th class="center sortable" data-k="cost">成本 ${si("cost")}</th>
+      <th class="center sortable" data-k="freq">频率 ${si("freq")}</th>
+      <th class="center sortable" data-k="roi">性价比 ${si("roi")}</th>
+      <th class="center sortable" data-k="tier">强度 ${si("tier")}</th>
+      <th style="width:220px">资料 · 目标</th>
+    </tr></thead>
+    <tbody>${list.length?list.map(rowHTML).join(""):`<tr><td colspan="9" class="empty">无匹配项</td></tr>`}</tbody>
+    </table></div></section>`;
+}
+
+function passFilter(d){
+  if(state.types.length && !state.types.includes(d.type)) return false;
+  if(state.tiers.length && !state.tiers.includes(d.tier)) return false;
+  if(d.ret < state.minRet) return false;
+  if(d.cost > state.maxCost) return false;
+  if(roiOf(d) < state.minRoi) return false;
+  if(state.q){
+    const s=state.q.toLowerCase();
+    const det=DETAILS[d.name]||{};
+    const subs=(det.sub||[]).map(x=>x&&(x.n||x)).filter(x=>typeof x==="string").join(" ");
+    const tuts=(det.tut||[]).map(x=>x&&x.title).filter(Boolean).join(" ");            // 教程标题纳入搜索
+    const cnr=(CN_RESOURCES[d.name]||[]).map(x=>x&&x.title).filter(Boolean).join(" "); // 中文资料标题纳入搜索
+    const hay=(d.name+" "+d.why+" "+d.mat+" "+d.ceil+" "+subs+" "+tuts+" "+cnr).toLowerCase();
+    if(!hay.includes(s)) return false;
+  }
+  return true;
+}
+function render(){
+  let list=D.filter(passFilter);
+  list.sort((a,b)=>{
+    const va=valOf(a,state.sort), vb=valOf(b,state.sort);
+    if(va!==vb) return state.dir==="desc"? vb-va : va-vb;
+    const sb=scoreOf(b), sa=scoreOf(a);
+    if(sb!==sa) return state.dir==="desc"? sb-sa : sa-sb;   // 次级随主方向
+    return state.dir==="desc"? b.ret-a.ret : a.ret-b.ret;   // 再次随主方向
+  });
+  const root=document.getElementById("sections");
+  if(state.flat){
+    root.innerHTML=tableHTMLFlat(list);
+  }else{
+    const order=state.types.length? state.types : ["A","B","C","D"];
+    root.innerHTML=order.map(t=>tableHTML(t,list.filter(d=>d.type===t))).join("");
+  }
+  document.getElementById("count").textContent=`共 ${list.length} / ${D.length} 个领域`;
+}
+
+/* ========= UI 同步与事件 ========= */
+function updateSortUI(){
+  const dirBtn=document.getElementById("sortdir");
+  if(dirBtn) dirBtn.textContent=state.dir==="desc"?"降序 ↓":"升序 ↑";
+  document.querySelectorAll("#fsort .srt").forEach(b=>b.classList.toggle("on",b.dataset.k===state.sort));
+}
+function syncFilterUI(){
+  document.querySelectorAll("#ftype .btn").forEach(b=>{const on=state.types.includes(b.dataset.v);b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);});
+  document.querySelectorAll("#ftier .btn").forEach(b=>{const on=state.tiers.includes(b.dataset.v);b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);});
+  const mr=document.getElementById("fminRet"),mc=document.getElementById("fmaxCost"),mro=document.getElementById("fminRoi"),se=document.getElementById("search");
+  if(mr) mr.value=state.minRet||"";
+  if(mc) mc.value=state.maxCost>=99?"":state.maxCost;
+  if(mro) mro.value=state.minRoi||"";
+  if(se) se.value=state.q;
+  updateSortUI();
+}
+function resetFilters(){
+  state.types=[]; state.tiers=[]; state.minRet=0; state.maxCost=99; state.minRoi=0; state.q="";
+}
+function resetAll(){
+  resetFilters(); state.sort="score"; state.dir="desc"; state.flat=false; state.expanded.clear();
+  const fb=document.getElementById("flatbtn"); if(fb) fb.textContent="🔁 平铺排序";
+  syncFilterUI(); render();
+}
+function applyPreset(p){
+  resetFilters();
+  if(p==="roi") state.minRoi=3;
+  else if(p==="cheap") state.maxCost=1;
+  else if(p==="ret") state.minRet=5;
+  else if(["A","B","C","D"].includes(p)) state.types=[p];
+  syncFilterUI(); render();
+}
+function bindToolbar(){
+  document.querySelectorAll("#ftype .btn").forEach(b=>b.onclick=()=>{
+    const v=b.dataset.v,i=state.types.indexOf(v);
+    if(i>=0) state.types.splice(i,1); else state.types.push(v);
+    syncFilterUI(); render();
+  });
+  document.querySelectorAll("#ftier .btn").forEach(b=>b.onclick=()=>{
+    const v=b.dataset.v,i=state.tiers.indexOf(v);
+    if(i>=0) state.tiers.splice(i,1); else state.tiers.push(v);
+    syncFilterUI(); render();
+  });
+  const mr=document.getElementById("fminRet"),mc=document.getElementById("fmaxCost"),mro=document.getElementById("fminRoi");
+  mr.onchange=()=>{state.minRet=+mr.value||0;render();};
+  mc.onchange=()=>{state.maxCost=mc.value===""?99:+mc.value;render();};
+  mro.onchange=()=>{state.minRoi=+mro.value||0;render();};
+  document.getElementById("search").oninput=e=>{state.q=e.target.value.trim();render();};
+  document.querySelectorAll("#fpreset .btn").forEach(b=>b.onclick=()=>applyPreset(b.dataset.p));
+  document.getElementById("resetbtn").onclick=resetAll;
+  document.querySelectorAll("#fsort .srt").forEach(b=>b.onclick=()=>{
+    const k=b.dataset.k;
+    if(state.sort===k){state.dir=state.dir==="desc"?"asc":"desc";}
+    else{state.sort=k; state.dir=(k==="cost")?"asc":"desc";}
+    syncFilterUI(); render();
+  });
+  const dirBtn=document.getElementById("sortdir");
+  if(dirBtn) dirBtn.onclick=()=>{state.dir=state.dir==="desc"?"asc":"desc"; syncFilterUI(); render();};
+  const flatBtn=document.getElementById("flatbtn");
+  if(flatBtn) flatBtn.onclick=function(){state.flat=!state.flat; this.textContent=state.flat?"🗂 分组显示":"🔁 平铺排序"; render();};
+  document.getElementById("sections").addEventListener("click",e=>{
+    const th=e.target.closest("th.sortable"); if(!th) return;
+    const k=th.dataset.k;
+    if(state.sort===k){state.dir=state.dir==="desc"?"asc":"desc";}
+    else{state.sort=k;state.dir=(k==="cost")?"asc":"desc";}
+    syncFilterUI(); render();
+  });
+  // 行展开/收起（点击领域行 toggle 下方详情）
+  document.getElementById("sections").addEventListener("click",e=>{
+    const row=e.target.closest("tr.drow"); if(!row) return;
+    const sel=window.getSelection&&window.getSelection();            // 正在选文本时不清展开/不收起，方便复制
+    if(sel&&sel.toString().length>0) return;
+    const name=row.dataset.name, det=row.nextElementSibling;
+    if(!det||!det.classList.contains("detail")) return;
+    if(state.expanded.has(name)){state.expanded.delete(name);det.style.display="none";row.classList.remove("expanded");}
+    else{state.expanded.add(name);det.style.display="";row.classList.add("expanded");}
+  });
+}
+
+/* 启动 */
+document.getElementById("sub").innerHTML=
+  "INTJ × 中国教育 × 程序员 × 审美/哲学资产 · 功利性提升版 · 共 <b>"+D.length+"</b> 个领域";
+renderPicks();          // 速览：独立于筛选，初始化渲染一次
+render();
+bindToolbar();
+syncFilterUI();         // 初始化 aria-pressed 等无障碍状态
+/* 返回顶部按钮（滚动>400px 显示） */
+(function(){
+  var b=document.getElementById('topBtn'); if(!b) return;
+  window.addEventListener('scroll',function(){b.classList.toggle('show',window.scrollY>400);},{passive:true});
+  b.onclick=function(){window.scrollTo({top:0,behavior:'smooth'});};
+})();
+</script>
+</body>
+</html>
